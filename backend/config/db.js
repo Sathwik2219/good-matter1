@@ -1,0 +1,143 @@
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./database.sqlite');
+
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS Users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS Investors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS Startups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    startup_name TEXT NOT NULL,
+    industry TEXT,
+    category TEXT,
+    stage TEXT,
+    raise_amount TEXT,
+    description TEXT,
+    founders TEXT,
+    traction TEXT,
+    website TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS Deals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    startup_id INTEGER NOT NULL,
+    status TEXT DEFAULT 'ACTIVE',
+    deal_stage TEXT,
+    deal_type TEXT,
+    closing_date TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS IntroductionRequests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    investor_id INTEGER,
+    startup_id INTEGER,
+    status TEXT DEFAULT 'PENDING',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  // Seed deals across all 5 Notion categories if table is empty
+  db.get('SELECT COUNT(*) as count FROM Startups', [], (err, row) => {
+    if (!err && row && row.count === 0) {
+      const startups = [
+        // Angel / Early Stage (Live from Notion)
+        ['Nomadiq', 'TravelTech', 'Angel / Early Stage', 'Seed', '₹4.5Cr', 'AI-powered travel platform tracking real-time fare changes and auto-booking at the lowest price. Eliminating manual travel searching and decision fatigue.', 'Kai (Founder), k.kai21999@gmail.com', '200+ early sign-ups on waitlist, Real-time fare tracking engine', 'nomadiq.co.in'],
+        ['Doffair', 'Pet Care (Tech)', 'Angel / Early Stage', 'Seed', '₹3Cr', 'PetTech ecosystem for socialization (playdates) and verified services + SaaS CRM for professionals. Building a full-stack pet parenting ecosystem.', 'Dushyant (Founder), dushyant@doffair.com', 'Verified service network, SaaS CRM for pet professionals', 'doffair.com'],
+        ['Frutacrunch', 'F&B', 'Angel / Early Stage', 'Early Stage', '₹50L', 'Premium, culture-driven air-dried fruit snacking brand targeting conscious urban consumers. Heritage and geography narrative focus.', 'Frutacrunch Team, frutacrunchindia@gmail.com', 'Premium brand positioning, Culture-driven narrative', 'frutacrunch.co.in'],
+        // VC / PE (Live from Notion)
+        ['Sugar Daddy\'s', 'Health & Wellness', 'Venture Capital / PE', 'Early Stage', '₹10Cr', 'D2C FoodTech brand replacing refined sugar with natural sweeteners across tea, coffee, and spreads. Diabetic-safe, clean-label alternatives.', 'Sugar Daddy\'s Team, notavailable@gmail.com', 'ARR ₹19 Lakh, Diabetic-safe certification', 'notavailable.com'],
+        // Institutional grade institutional examples (to show full 5 categories)
+        ['Cognitive AI', 'AI/SaaS', 'Venture Capital / PE', 'Series A', '₹35Cr', 'Enterprise compliance workflows automated using LLMs. Reducing compliance costs by 60% for mid-market clients.', 'Arjun Dev (Ex-McKinsey), Deepika Rao (Stanford AI)', '25 enterprise clients, ₹4.2Cr ARR', 'cognitive.ai'],
+        // IPO Stage
+        ['LogiRoute', 'Logistics', 'IPO Stage', 'Pre-IPO', '₹120Cr', 'AI-powered route optimisation for last-mile delivery. Operating across 18 cities, reducing delivery costs by 35%.', 'Manish Gupta (Ex-Delhivery), Ritika Agarwal', '18 cities, ₹42Cr ARR, profitable for 2 quarters', 'logiroute.com'],
+        // Debt & Structured Finance
+        ['AgriCredit', 'AgriFintech', 'Debt & Structured Finance', 'Growth', '₹50Cr (Structured Debt)', 'Non-dilutive structured credit facility for Agritech scale-ups. Revenue-based financing with flexible repayment.', 'Ravi Teja (CA, Ex-HDFC)', 'Deployed ₹18Cr across 6 companies, 0 defaults', 'agricredit.in'],
+        // M&A
+        ['RetailMax', 'Retail / D2C', 'Mergers & Acquisitions', 'Acquisition Target', '₹80Cr (Exit)', 'Profitable D2C brand in premium home goods with strong offline presence. Founders seeking PE or strategic acquirer.', 'Sanjay Mehta (Founder), Nilam Shah (COO)', '₹22Cr revenue, EBITDA positive, 8 years operating history', 'retailmax.co'],
+      ];
+
+      const stmt = db.prepare(`INSERT INTO Startups 
+        (startup_name, industry, category, stage, raise_amount, description, founders, traction, website) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      startups.forEach(s => stmt.run(s));
+      stmt.finalize();
+
+      setTimeout(() => {
+        db.all('SELECT id, category FROM Startups', [], (err, rows) => {
+          if (!err && rows) {
+            const dealStmt = db.prepare('INSERT INTO Deals (startup_id, status, deal_stage, deal_type, closing_date) VALUES (?, ?, ?, ?, ?)');
+            rows.forEach(r => {
+              const closingDates = ['2025-04-30', '2025-05-31', '2025-06-30', '2025-07-31'];
+              const closing = closingDates[Math.floor(Math.random() * closingDates.length)];
+              dealStmt.run([r.id, 'ACTIVE', 'Open', r.category, closing]);
+            });
+            dealStmt.finalize();
+          }
+        });
+      }, 200);
+    }
+  });
+});
+
+function convertParams(text) {
+  return text.replace(/\$(\d+)/g, '?');
+}
+
+module.exports = {
+  query: (text, params = []) => {
+    return new Promise((resolve, reject) => {
+      const sqliteText = convertParams(text);
+      const trimmed = sqliteText.trim().toUpperCase();
+      const isInsert = trimmed.startsWith('INSERT');
+
+      if (isInsert) {
+        const hasReturning = /RETURNING/i.test(sqliteText);
+        if (hasReturning) {
+          const parts = sqliteText.split(/RETURNING/i);
+          const insertSQL = parts[0].trim();
+          const returningFields = parts[1].trim();
+          
+          // Extract table name from INSERT INTO [TableName]
+          const match = insertSQL.match(/INSERT\s+INTO\s+([^\s\(\)]+)/i);
+          const tableName = match ? match[1] : 'Users';
+
+          db.run(insertSQL, params, function(err) {
+            if (err) {
+              console.error('SQL Error (INSERT):', err.message, '| Query:', insertSQL);
+              return reject(err);
+            }
+            const lastId = this.lastID;
+            db.get(`SELECT ${returningFields} FROM ${tableName} WHERE id = ?`, [lastId], (err, row) => {
+              if (err || !row) resolve({ rows: [{ id: lastId }] });
+              else resolve({ rows: [row] });
+            });
+          });
+        } else {
+          db.run(sqliteText, params, function(err) {
+            if (err) {
+              console.error('SQL Error (INSERT):', err.message, '| Query:', sqliteText);
+              return reject(err);
+            }
+            resolve({ rows: [{ id: this.lastID }] });
+          });
+        }
+      } else {
+        db.all(sqliteText, params, (err, rows) => {
+          if (err) {
+            console.error('SQL Error:', err.message, '| Query:', sqliteText);
+            reject(err);
+          } else {
+            resolve({ rows: rows || [] });
+          }
+        });
+      }
+    });
+  }
+};
