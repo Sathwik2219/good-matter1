@@ -13,8 +13,13 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Apply from './pages/Apply';
+import DealSubmit from './pages/DealSubmit';
 import InvestorDashboard from './pages/InvestorDashboard';
 import InvestorDeals from './pages/InvestorDeals';
+import InvestorProfile from './pages/InvestorProfile';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+import AdminRegister from './pages/AdminRegister';
 
 function App() {
   return (
@@ -23,6 +28,7 @@ function App() {
         <Navbar />
         <main className="main-content">
           <Routes>
+            {/* Public */}
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/investors" element={<Investors />} />
@@ -33,9 +39,16 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/apply" element={<Apply />} />
-            {/* Investor Protected Pages */}
+            {/* Deal Submission (founders / scouts / partners) */}
+            <Route path="/submit-deal" element={<DealSubmit />} />
+            {/* Investor Protected */}
             <Route path="/investor/dashboard" element={<InvestorDashboard />} />
             <Route path="/investor/deals" element={<InvestorDeals />} />
+            <Route path="/investor/profile" element={<InvestorProfile />} />
+            {/* Admin Protected */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/register" element={<AdminRegister />} />
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>
         <Footer />

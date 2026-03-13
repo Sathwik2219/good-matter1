@@ -13,7 +13,7 @@ const Login = () => {
         setError('');
         
         try {
-            const response = await fetch('http://localhost:5001/api/auth/login', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -28,7 +28,9 @@ const Login = () => {
                 
                 // Redirect based on role
                 if (data.user.role === 'INVESTOR') navigate('/investor/dashboard');
+                else if (data.user.role === 'ADMIN') navigate('/admin');
                 else navigate('/');
+
             } else {
                 setError(data.message || 'Login failed');
             }
@@ -44,8 +46,8 @@ const Login = () => {
 
                     <div className="text-center" style={{ marginBottom: '2.5rem' }}>
                         <Link to="/" className="navbar-logo" style={{ display: 'inline-block', marginBottom: '1rem' }}>GoodMatter</Link>
-                        <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Investor Portal</h1>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Sign in to view curated deals.</p>
+                        <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Private Access for Investors</h1>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Gain selective access to institutional‑grade startup opportunities.</p>
                     </div>
 
                     {error && <div style={{ color: 'red', backgroundColor: '#ffebee', padding: '10px', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.85rem' }}>{error}</div>}

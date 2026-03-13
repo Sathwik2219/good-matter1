@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, Users, FileText, ArrowRight, LogOut, BarChart2, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import '../pages/Home.css';
 
-const API = 'http://localhost:5001';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const categoryColors = {
   'Angel / Early Stage':        { bg: '#eef2ff', color: '#6366f1', border: '#6366f1' },
@@ -19,10 +19,14 @@ const InvestorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [matched, setMatched] = useState([]);
+  const [loadingMatched, setLoadingMatched] = useState(true);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) { navigate('/login'); return; }
 
+    // Fetch dashboard stats
     fetch(`${API}/api/investor/dashboard`, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -32,6 +36,14 @@ const InvestorDashboard = () => {
       })
       .then(data => { setDashboard(data); setLoading(false); })
       .catch(err => { setError(err.message); setLoading(false); });
+
+    // Fetch matched deals
+    fetch(`${API}/api/investor/matched-deals`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(data => { setMatched(data.slice(0, 3)); setLoadingMatched(false); })
+      .catch(() => setLoadingMatched(false));
   }, [navigate]);
 
   const handleLogout = () => {
@@ -61,6 +73,44 @@ const InvestorDashboard = () => {
     'Angel / Early Stage', 'Venture Capital / PE', 'IPO Stage',
     'Debt & Structured Finance', 'Mergers & Acquisitions'
   ];
+
+  const MatchedDealsList = () => {
+    if (loadingMatched) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>Finding matches...</div>;
+    if (matched.length === 0) return (
+      <div style={{ textAlign: 'center', padding: '2rem 2rem', color: 'var(--color-text-muted)', border: '1px dashed #e2e8f0', borderRadius: '14px' }}>
+        <TrendingUp size={32} style={{ opacity: 0.3, marginBottom: '0.75rem' }} />
+        <p style={{ fontSize: '0.9rem', margin: 0 }}>No AI matches yet. Complete your profile to get discovered!</p>
+        <Link to="/investor/profile" className="btn btn-outline btn-sm" style={{ marginTop: '1rem' }}>Complete Profile</Link>
+      </div>
+    );
+
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+        {matched.map(deal => (
+          <div key={deal.deal_id} style={{ padding: '1.25rem', border: '1px solid #e2e8f0', borderRadius: '14px', background: '#f8fafc', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', color: 'var(--color-primary)' }}>{deal.startup_name}</h4>
+                <p style={{ margin: '0.2rem 0 0', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{deal.industry} · {deal.stage}</p>
+              </div>
+              <div style={{ padding: '4px 10px', borderRadius: '20px', background: '#eef2ff', color: '#6366f1', fontSize: '0.72rem', fontWeight: '800' }}>
+                AI: {deal.ai_score}
+              </div>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem', lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {deal.problem || deal.description}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid #edf2f7' }}>
+               <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                 <CheckCircle size={12} /> {deal.match_reason || 'Highly Relevant'}
+               </span>
+               <Link to="/investor/deals" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#6366f1', textDecoration: 'none' }}>Details →</Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f6fb', paddingTop: '80px' }}>
@@ -185,6 +235,18 @@ const InvestorDashboard = () => {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* New: Matched for You Section */}
+          <div className="dash-card" style={{ gridColumn: '1 / -1' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingUp size={18} style={{ color: '#6366f1' }} /> Matched for You (AI Curated)
+              </h3>
+              <Link to="/investor/deals" style={{ fontSize: '0.85rem', color: '#6366f1', textDecoration: 'none', fontWeight: '600' }}>See all matched deals →</Link>
+            </div>
+            
+            <MatchedDealsList />
           </div>
 
           {/* GoodMatter Philosophy Banner */}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Target, Users, ShieldCheck, TrendingUp } from 'lucide-react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import './Home.css';
+import saswatImg from '../assets/team/saswat.png';
 
 const Home = () => {
     useScrollAnimation();
@@ -69,17 +70,16 @@ const Home = () => {
         { icon: <TrendingUp size={24} className="feature-icon" />, title: "High-Signal Opportunities", desc: "Prioritizing quality over volume — every deal is curated and conviction-backed." },
     ];
 
-    const deals = [
-        { name: "AeroPay", industry: "Fintech", stage: "Seed", raise: "₹5Cr", desc: "Next-gen B2B payment infrastructure for emerging markets.", logo: "AP" },
-        { name: "HealthSync", industry: "HealthTech", stage: "Pre-Series A", raise: "₹12Cr", desc: "AI-driven patient data unification and diagnostic insights.", logo: "HS" },
-        { name: "Cognitive AI", industry: "AI/SaaS", stage: "Seed", raise: "₹3Cr", desc: "Automating enterprise compliance workflows with large language models.", logo: "CA" },
-        { name: "GreenGrid", industry: "ClimateTech", stage: "Series A", raise: "₹25Cr", desc: "Decentralized energy management grids for smart cities.", logo: "GG" },
-    ];
 
     const teamMembers = [
+        { 
+            name: "Saswat", 
+            role: "Founder", 
+            image: saswatImg,
+            linkedin: "https://www.linkedin.com/company/goodmattercommunity/"
+        },
         { name: "Founder", role: "Managing Partner" },
         { name: "Founder", role: "Head of Investments" },
-        { name: "Founder", role: "Partnership Lead" },
     ];
 
     return (
@@ -158,42 +158,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* FEATURED DEALS */}
-            <section className="section bg-white">
-                <div className="container">
-                    <div className="section-header scroll-animate">
-                        <div className="header-split">
-                            <div>
-                                <h2>Recent Opportunities Shared With Our Community</h2>
-                                <p className="section-subtitle">A glimpse into our curated pipeline of high-signal startups.</p>
-                            </div>
-                            <Link to="/investors" className="btn btn-outline">View All Deals <ChevronRight size={16} /></Link>
-                        </div>
-                    </div>
-                    <div className="deals-grid">
-                        {deals.map((deal, index) => (
-                            <div key={index} className={`deal-card scroll-animate delay-${(index + 1) * 100}`}>
-                                <div className="deal-header">
-                                    <div className="deal-logo">{deal.logo}</div>
-                                    <div className="deal-tags">
-                                        <span className="tag">{deal.industry}</span>
-                                        <span className="tag stage-tag">{deal.stage}</span>
-                                    </div>
-                                </div>
-                                <h3 className="deal-name">{deal.name}</h3>
-                                <p className="deal-desc">{deal.desc}</p>
-                                <div className="deal-footer">
-                                    <div className="deal-metric">
-                                        <span className="metric-label">Target Raise</span>
-                                        <span className="metric-value">{deal.raise}</span>
-                                    </div>
-                                    <Link to="/login" className="btn btn-sm btn-primary">View Deal</Link>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* TEAM SECTION */}
             <section className="section bg-light">
@@ -205,13 +169,21 @@ const Home = () => {
                     <div className="team-grid">
                         {teamMembers.map((member, index) => (
                             <div key={index} className={`team-card scroll-animate delay-${(index + 1) * 100}`}>
-                                <div className="team-photo-placeholder">
-                                    <UserIcon />
+                                <div className="team-photo-wrapper">
+                                    {member.image ? (
+                                        <img src={member.image} alt={member.name} className="team-photo" />
+                                    ) : (
+                                        <div className="team-photo-placeholder">
+                                            <UserIcon />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="team-info">
                                     <h3>{member.name}</h3>
                                     <p className="team-role">{member.role}</p>
-                                    <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="linkedin-link">LinkedIn Profile</a>
+                                    <a href={member.linkedin || "https://linkedin.com"} target="_blank" rel="noreferrer" className="linkedin-link">
+                                        LinkedIn Profile
+                                    </a>
                                 </div>
                             </div>
                         ))}

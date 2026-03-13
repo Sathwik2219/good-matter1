@@ -18,8 +18,8 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Please enter all fields' });
     }
 
-    if (!['ADMIN', 'INVESTOR', 'FOUNDER'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role specified' });
+    if (!['INVESTOR', 'FOUNDER'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role. Use the Admin portal to create admin accounts.' });
     }
 
     // Check for existing user

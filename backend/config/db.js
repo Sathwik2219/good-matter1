@@ -42,6 +42,75 @@ db.serialize(() => {
     status TEXT DEFAULT 'PENDING',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS StartupApplications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    founder_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    linkedin_url TEXT,
+    startup_name TEXT NOT NULL,
+    website TEXT,
+    industry TEXT,
+    stage TEXT,
+    raise_amount TEXT,
+    description TEXT,
+    pitch_deck_url TEXT,
+    additional_info TEXT,
+    status TEXT DEFAULT 'PENDING',
+    rejection_reason TEXT,
+    ai_score INTEGER DEFAULT 0,
+    ai_summary TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS Bookmarks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    startup_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, startup_id)
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS DealSubmissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    submitted_by TEXT NOT NULL,
+    email TEXT NOT NULL,
+    startup_name TEXT NOT NULL,
+    industry TEXT,
+    stage TEXT,
+    problem TEXT,
+    solution TEXT,
+    market_size TEXT,
+    business_model TEXT,
+    traction TEXT,
+    revenue_metrics TEXT,
+    competition TEXT,
+    financial_projection TEXT,
+    funding_amount TEXT,
+    pitch_deck_url TEXT,
+    status TEXT DEFAULT 'PENDING',
+    filter_status TEXT DEFAULT 'PENDING',
+    rejection_reason TEXT,
+    ai_score INTEGER DEFAULT 0,
+    ai_breakdown TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS InvestorProfiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    preferred_sectors TEXT DEFAULT '[]',
+    preferred_stages TEXT DEFAULT '[]',
+    ticket_size TEXT,
+    bio TEXT,
+    linkedin_url TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS DealMatches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deal_id INTEGER NOT NULL,
+    investor_id INTEGER NOT NULL,
+    match_score INTEGER DEFAULT 0,
+    match_reason TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(deal_id, investor_id)
+  )`);
 
   // Seed deals across all 5 Notion categories if table is empty
   db.get('SELECT COUNT(*) as count FROM Startups', [], (err, row) => {
