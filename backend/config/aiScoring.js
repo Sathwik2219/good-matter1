@@ -7,10 +7,10 @@
 const WEIGHTS = {
   team:        0.20,
   market:      0.20,
-  product:     0.20,
-  traction:    0.15,
-  financials:  0.15,
-  competition: 0.10,
+  product:     0.15,
+  traction:    0.20,
+  financials:  0.10,
+  competition: 0.15,
 };
 
 function scoreTeam({ founder_name, industry }) {
@@ -34,7 +34,7 @@ function scoreTeam({ founder_name, industry }) {
   return { score: Math.min(score, 10), signals, risks };
 }
 
-function scoreMarket({ market_size, industry }) {
+async function scoreMarketDynamic(industry, market_size) {
   let score = 4;
   const signals = [];
   const risks = [];
@@ -58,7 +58,16 @@ function scoreMarket({ market_size, industry }) {
     signals.push('High-growth sector with strong investor interest');
   }
 
-  return { score: Math.min(score, 10), signals, risks };
+  // Placeholder for dynamic market signals (e.g. from Google Trends / external APIs)
+  let multiplier = 1.0;
+  // If external signals indicate high CAGRs (>15%) or high funding activity:
+  // multiplier += 0.2;
+  // If saturated competition:
+  // multiplier -= 0.15;
+
+  score = Math.min(Math.round(score * multiplier), 10);
+  
+  return { score, signals, risks };
 }
 
 function scoreProduct({ problem, solution }) {
@@ -189,30 +198,73 @@ function scoreCompetition({ competition }) {
 /**
  * Main scoring function
  * @param {Object} data — startup submission data
- * @returns {{ ai_score: number, ai_breakdown: string, filter_status: string }}
+ * @returns {Promise<{ ai_score: number, ai_breakdown: string, filter_status: string, listing_tier: string, listing_fee: number }>}
  */
-function scoreStartupV2(data) {
+async function scoreStartupV2(data) {
   const team        = scoreTeam(data);
-  const market      = scoreMarket(data);
+  const market      = await scoreMarketDynamic(data.industry, data.market_size);
   const product     = scoreProduct(data);
   const traction    = scoreTraction(data);
   const financials  = scoreFinancials(data);
   const competition = scoreCompetition(data);
 
-  const weightedScore =
-    team.score        * WEIGHTS.team +
-    market.score      * WEIGHTS.market +
-    product.score     * WEIGHTS.product +
-    traction.score    * WEIGHTS.traction +
-    financials.score  * WEIGHTS.financials +
-    competition.score * WEIGHTS.competition;
+  // Calculate raw scores
+  const rawScores = {
+    team:        scoreTeam(data),
+    market:      await scoreMarketDynamic(data.industry, data.market_size),
+    product:     scoreProduct(data),
+    traction:    scoreTraction(data),
+    financials:  scoreFinancials(data),
+    competition: competition.score, // competition is already an object in scoreStartupV2? No, wait.
+  };
 
-  const totalScore = Math.round(weightedScore * 10); // scale to 0–100
+  // Wait, let's look at the original code structure for competition
+  const competitionScoreObj = scoreCompetition(data);
 
-  // Determine filter status
+  // Normalize weights if fields are missing (optional) or just use generous defaults
+  // For "Minimal Submissions" (no description/problem/traction text), we boost the baseline
+  const isMinimal = !data.problem && !data.solution && !data.traction && !data.competition;
+  
+  let weightedScore =
+    rawScores.team.score        * WEIGHTS.team +
+    rawScores.market.score      * WEIGHTS.market +
+    rawScores.product.score     * WEIGHTS.product +
+    rawScores.traction.score    * WEIGHTS.traction +
+    rawScores.financials.score  * WEIGHTS.financials +
+    competitionScoreObj.score   * WEIGHTS.competition;
+
+  // Boost for minimal submissions that have a named founder and hot industry
+  if (isMinimal) {
+    weightedScore += 1.5; // Give a baseline boost to allow further review
+  }
+
+  const totalScore = Math.min(Math.round(weightedScore * 10), 100); 
+
+  // Determine filter status, tier, and fee
   let filter_status = 'ELIGIBLE';
-  if (totalScore < 50)       filter_status = 'AUTO_REJECTED';
-  else if (totalScore <= 70) filter_status = 'REVIEW_NEEDED';
+  let listing_tier = "REJECT";
+  let listing_fee = 0;
+  
+  if (totalScore >= 85) { 
+    listing_tier = "FEATURED"; 
+    listing_fee = 8000; 
+  } else if (totalScore >= 70) { 
+    listing_tier = "STANDARD"; 
+    listing_fee = 15000; 
+  } else if (totalScore >= 60) { 
+    listing_tier = "LIMITED"; 
+    listing_fee = 22000; 
+  } else {
+    // For minimal submissions, we are more likely to flag for REVIEW rather than AUTO-REJECT
+    if (isMinimal && totalScore >= 45) {
+      filter_status = 'REVIEW_NEEDED';
+      listing_tier = "PENDING_REVIEW";
+    } else {
+      filter_status = 'AUTO_REJECTED';
+      listing_tier = "REJECT";
+    }
+    listing_fee = 0;
+  }
 
   // Market opportunity label
   let marketOpportunity = 'Moderate';
@@ -225,6 +277,7 @@ function scoreStartupV2(data) {
   if (totalScore >= 80) investmentPotential = 'Strong Investment Candidate';
   else if (totalScore >= 65) investmentPotential = 'Promising — Needs Due Diligence';
   else if (totalScore >= 50) investmentPotential = 'Early Stage — Watch Closely';
+  else if (isMinimal) investmentPotential = 'Assessment Pending Profile Completion';
 
   const breakdown = {
     scores: {
@@ -237,6 +290,8 @@ function scoreStartupV2(data) {
     },
     total: totalScore,
     filter_status,
+    listing_tier,
+    listing_fee,
     marketOpportunity,
     investmentPotential,
     strengths: [
@@ -261,6 +316,8 @@ function scoreStartupV2(data) {
     ai_score:     totalScore,
     ai_breakdown: JSON.stringify(breakdown),
     filter_status,
+    listing_tier,
+    listing_fee
   };
 }
 

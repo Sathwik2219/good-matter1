@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Target, Users, ShieldCheck, TrendingUp } from 'lucide-react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import './Home.css';
-import saswatImg from '../assets/team/saswat.png';
 
 const Home = () => {
     useScrollAnimation();
@@ -31,7 +30,7 @@ const Home = () => {
 
         const draw = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillStyle = 'rgba(250, 177, 160, 0.4)'; // Soft Peach
             particles.forEach(p => {
                 p.x += p.vx; p.y += p.vy;
                 if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
@@ -40,7 +39,7 @@ const Home = () => {
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fill();
             });
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.strokeStyle = 'rgba(116, 185, 255, 0.1)'; // Soft Blue
             ctx.lineWidth = 0.5;
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
@@ -71,16 +70,6 @@ const Home = () => {
     ];
 
 
-    const teamMembers = [
-        { 
-            name: "Saswat", 
-            role: "Founder", 
-            image: saswatImg,
-            linkedin: "https://www.linkedin.com/company/goodmattercommunity/"
-        },
-        { name: "Founder", role: "Managing Partner" },
-        { name: "Founder", role: "Head of Investments" },
-    ];
 
     return (
         <div className="home-page">
@@ -89,19 +78,19 @@ const Home = () => {
                 <canvas ref={canvasRef} className="hero-canvas"></canvas>
                 <div className="container hero-container animate-fade-in">
                     <div className="hero-content">
-                        <div className="hero-badge">Private Markets Access</div>
+                        <div className="hero-badge">Curation • Restraint • Trust</div>
                         <h1 className="hero-title">
-                            Selective Access to <span className="text-highlight">Institutional-Grade</span> Opportunities Across Private Markets
+                            Institutional-Grade <span className="text-highlight">Private Market</span> Access
                         </h1>
                         <p className="hero-subtitle">
-                            A private community connecting exceptional founders with a curated network of investors.
+                          Only 3% upon successful deal closure. No upfront fees.
                         </p>
                         <p className="hero-desc">
-                            Good Matter Community curates high-quality early-stage startups and shares them with a trusted network of investors. Every deal is reviewed, vetted, and distributed privately to our investor community.
+                            Good Matter Community curates high-quality early-stage startups and shares them with a trusted network of investors. Every deal is reviewed, vetted, and distributed privately.
                         </p>
                         <div className="hero-actions">
-                            <Link to="/login" className="btn btn-accent btn-lg">Join as an Investor <ArrowRight size={20} /></Link>
-                            <Link to="/apply" className="btn btn-outline-light btn-lg">Submit Your Startup</Link>
+                            <Link to="/founder/login" className="btn btn-primary btn-lg">Submit Startup</Link>
+                            <Link to="/login" className="btn btn-outline btn-lg">Investor Login <ArrowRight size={20} /></Link>
                         </div>
                     </div>
                     <div className="hero-stats">
@@ -140,7 +129,7 @@ const Home = () => {
             </section>
 
             {/* VALUE PROPOSITION */}
-            <section className="section bg-light">
+            <section className="section bg-deep">
                 <div className="container">
                     <div className="section-header text-center scroll-animate">
                         <h2>Why GoodMatter?</h2>
@@ -159,32 +148,56 @@ const Home = () => {
             </section>
 
 
-            {/* TEAM SECTION */}
-            <section className="section bg-light">
+            {/* 3-STEP FLOW */}
+            <section className="section">
                 <div className="container">
                     <div className="section-header text-center scroll-animate">
-                        <h2>The Team Behind Good Matter</h2>
-                        <p className="section-subtitle">Operators and investors building the network we wanted to see.</p>
+                        <h2>How It Works</h2>
+                        <p className="section-subtitle">A streamlined process for exceptional capital deployment.</p>
                     </div>
-                    <div className="team-grid">
-                        {teamMembers.map((member, index) => (
-                            <div key={index} className={`team-card scroll-animate delay-${(index + 1) * 100}`}>
-                                <div className="team-photo-wrapper">
-                                    {member.image ? (
-                                        <img src={member.image} alt={member.name} className="team-photo" />
-                                    ) : (
-                                        <div className="team-photo-placeholder">
-                                            <UserIcon />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="team-info">
-                                    <h3>{member.name}</h3>
-                                    <p className="team-role">{member.role}</p>
-                                    <a href={member.linkedin || "https://linkedin.com"} target="_blank" rel="noreferrer" className="linkedin-link">
-                                        LinkedIn Profile
-                                    </a>
-                                </div>
+                    <div className="features-grid">
+                        <div className="feature-card scroll-animate delay-100">
+                            <div className="icon-wrapper">1</div>
+                            <h3>Submit</h3>
+                            <p>Founders apply through a structured application form for initial screening.</p>
+                        </div>
+                        <div className="feature-card scroll-animate delay-200">
+                            <div className="icon-wrapper">2</div>
+                            <h3>Review & Vetting</h3>
+                            <p>Internal evaluation and benchmark-driven scoring to identify high-signal ventures.</p>
+                        </div>
+                        <div className="feature-card scroll-animate delay-300">
+                            <div className="icon-wrapper">3</div>
+                            <h3>Curate</h3>
+                            <p>Selected deals are professionalized and prepared for institutional-grade distribution.</p>
+                        </div>
+                        <div className="feature-card scroll-animate delay-400">
+                            <div className="icon-wrapper">4</div>
+                            <h3>Deal Goes Live</h3>
+                            <p>Vetted opportunities are distributed privately to our selective investor collective.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CURATED SEGMENTS */}
+            <section className="section bg-deep">
+                <div className="container">
+                    <div className="section-header text-center scroll-animate">
+                        <h2 className="section-title">Institutional Coverage</h2>
+                        <p className="section-subtitle">We curate high-signal opportunities across the primary capital spectrum.</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+                        {[
+                            { title: "Angel / Early Stage", desc: "Seed to Pre-Series A" },
+                            { title: "Venture Capital / PE", desc: "Growth & Secondary Blocks" },
+                            { title: "IPO Stage", desc: "Late-stage Pre-IPO" },
+                            { title: "Debt & Structured Finance", desc: "Non-equity capital" },
+                            { title: "Mergers & Acquisitions", desc: "Strategic Exits" }
+                        ].map((segment, i) => (
+                            <div key={i} className="glass scroll-animate" style={{ padding: '2rem', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.6)', transition: 'transform 0.3s ease' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '0.5rem' }}>{segment.title}</h4>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0, fontWeight: '600' }}>{segment.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -192,13 +205,20 @@ const Home = () => {
             </section>
 
             {/* CLOSING CTA */}
-            <section className="section-dark section text-center">
-                <div className="container cta-container scroll-animate">
-                    <h2>Good deals. Good people. Good Matter.</h2>
-                    <p className="cta-subtitle">Apply today to get access to our private network.</p>
-                    <div className="hero-actions justify-center mt-4">
-                        <Link to="/login" className="btn btn-accent btn-lg">Join the Investor Community</Link>
-                        <Link to="/apply" className="btn btn-outline-light btn-lg">Apply as a Founder</Link>
+            <section className="section">
+                <div className="container">
+                    <div className="glass scroll-animate" style={{ padding: '6rem 2rem', borderRadius: '48px', textAlign: 'center', background: 'var(--color-primary)', color: 'white', overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ position: 'relative', zIndex: 2 }}>
+                          <h2 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>Good deals. Good people.</h2>
+                          <p style={{ maxWidth: '600px', margin: '0 auto 3.5rem', fontSize: '1.25rem', opacity: 0.8, fontWeight: '500' }}>
+                              Join the most selective community of aligned investors and exceptional founders.
+                          </p>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                              <Link to="/login" className="btn btn-primary btn-lg" style={{ background: 'white', color: 'var(--color-primary)', border: 'none' }}>Join as Investor</Link>
+                              <Link to="/founder/login" className="btn btn-outline btn-lg" style={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}>Apply as Founder</Link>
+                          </div>
+                        </div>
+                        <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '140%', height: '200%', background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
                     </div>
                 </div>
             </section>

@@ -1,0 +1,33 @@
+{
+  "last_updated": "2026-03-18",
+  "benchmarks": {
+    "fintech_seed": {
+      "mrr": { "poor": 2000, "average": 8000, "good": 20000 },
+      "growth": { "poor": 5, "average": 15, "good": 30 },
+      "retention": { "poor": 40, "average": 60, "good": 80 }
+    },
+    "saas_seed": {
+      "mrr": { "poor": 1000, "average": 5000, "good": 15000 },
+      "growth": { "poor": 8, "average": 20, "good": 40 },
+      "retention": { "poor": 50, "average": 70, "good": 85 }
+    },
+    "healthtech_seed": {
+      "mrr": { "poor": 500, "average": 3000, "good": 10000 },
+      "growth": { "poor": 3, "average": 10, "good": 20 },
+      "retention": { "poor": 60, "average": 80, "good": 90 }
+    },
+    "default": {
+      "mrr": { "poor": 1000, "average": 5000, "good": 15000 },
+      "growth": { "poor": 5, "average": 15, "good": 30 },
+      "retention": { "poor": 50, "average": 65, "good": 80 }
+    }
+  },
+  "weights": {
+    "team": 20,
+    "market": 20,
+    "traction": 20,
+    "product": 15,
+    "competition": 15,
+    "financials": 10
+  }
+}

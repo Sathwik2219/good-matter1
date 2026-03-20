@@ -39,12 +39,12 @@ const Investors = () => {
                     <p className="hero-subtitle mx-auto" style={{ maxWidth: '700px', margin: '0 auto 2rem' }}>
                         Gain selective access to institutional-grade startup opportunities before they hit the broader market.
                     </p>
-                    <Link to="/login" className="btn btn-accent btn-lg">Apply for Access</Link>
+                    <Link to="/login" className="btn btn-accent btn-lg">Investor Login</Link>
                 </div>
             </section>
 
             {/* Features Grid */}
-            <section className="section bg-light">
+            <section className="section bg-deep">
                 <div className="container">
                     <div className="section-header text-center scroll-animate">
                         <h2>Why Invest with GoodMatter?</h2>
@@ -65,13 +65,13 @@ const Investors = () => {
             </section>
 
             {/* CTA */}
-            <section className="section bg-white text-center">
+            <section className="section bg-deep text-center">
                 <div className="container scroll-animate">
                     <h2>Ready to see our dealflow?</h2>
                     <p className="section-subtitle mt-4 mb-4" style={{ margin: '1rem auto 2rem' }}>
                         Membership is invite-only or by application to ensure high signal-to-noise ratio.
                     </p>
-                    <Link to="/login" className="btn btn-primary btn-lg">Apply as Investor</Link>
+                    <Link to="/login" className="btn btn-primary btn-lg">Investor Login</Link>
                 </div>
             </section>
         </div>

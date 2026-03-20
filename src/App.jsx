@@ -7,12 +7,11 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Investors from './pages/Investors';
 import Founders from './pages/Founders';
-import ImpactStudio from './pages/ImpactStudio';
+import Studio from './pages/Studio';
 import Deals from './pages/Deals';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Apply from './pages/Apply';
 import DealSubmit from './pages/DealSubmit';
 import InvestorDashboard from './pages/InvestorDashboard';
 import InvestorDeals from './pages/InvestorDeals';
@@ -20,6 +19,10 @@ import InvestorProfile from './pages/InvestorProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
+import Pricing from './pages/Pricing';
+import FounderLogin from './pages/FounderLogin';
+import FounderDashboard from './pages/FounderDashboard';
+import VerifyLink from './pages/VerifyLink';
 
 function App() {
   return (
@@ -33,14 +36,18 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/investors" element={<Investors />} />
             <Route path="/founders" element={<Founders />} />
-            <Route path="/impact-studio" element={<ImpactStudio />} />
+            <Route path="/studio" element={<Studio />} />
             <Route path="/deals" element={<Deals />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/apply" element={<Apply />} />
-            {/* Deal Submission (founders / scouts / partners) */}
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/verify" element={<VerifyLink />} />
+            {/* Founder Routes */}
             <Route path="/submit-deal" element={<DealSubmit />} />
+            <Route path="/founder/login" element={<FounderLogin />} />
+            <Route path="/founder/signup" element={<FounderLogin />} />
+            <Route path="/founder/dashboard" element={<FounderDashboard />} />
             {/* Investor Protected */}
             <Route path="/investor/dashboard" element={<InvestorDashboard />} />
             <Route path="/investor/deals" element={<InvestorDeals />} />

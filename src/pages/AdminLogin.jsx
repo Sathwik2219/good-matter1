@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Shield, ArrowRight, Lock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Shield } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -39,109 +40,100 @@ const AdminLogin = () => {
     };
 
     const inputStyle = {
-        padding: '0.85rem 1rem',
-        borderRadius: '10px',
-        border: '1px solid rgba(255,255,255,0.15)',
-        outline: 'none',
-        width: '100%',
-        fontFamily: 'inherit',
-        fontSize: '0.95rem',
-        background: 'rgba(255,255,255,0.07)',
-        color: 'white',
-        transition: 'border-color 0.2s',
+        width: '100%', padding: '0.85rem 1rem',
+        background: 'var(--color-bg-surface-light)', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '12px', color: 'var(--color-text-main)', outline: 'none',
+        fontFamily: 'inherit', fontSize: '0.95rem', boxSizing: 'border-box',
+    };
+
+    const labelStyle = {
+        display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--color-text-muted)'
     };
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0b0f1a 0%, #111827 50%, #0f1f38 100%)',
-            padding: '2rem',
-        }}>
-            {/* Subtle grid bg */}
-            <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(99,102,241,0.08) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
-
-            <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
-
-                {/* Lock Icon */}
-                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <div style={{ width: '64px', height: '64px', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 8px 32px rgba(99,102,241,0.35)' }}>
-                        <Shield size={30} style={{ color: 'white' }} />
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem', background: 'var(--color-bg-main)' }}>
+            <div style={{ width: '100%', maxWidth: '420px' }}>
+                
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                    <div style={{ width: '60px', height: '60px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+                        <Shield size={28} style={{ color: 'var(--color-accent)' }} />
                     </div>
-                    <h1 style={{ color: 'white', fontSize: '1.6rem', fontWeight: '800', margin: '0 0 0.4rem' }}>Admin Portal</h1>
-                    <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem', margin: 0 }}>Restricted access — GoodMatter team only</p>
+                    <h1 style={{ fontSize: '1.9rem', fontWeight: '800', color: 'var(--color-text-main)', margin: '0 0 0.5rem' }}>
+                        Admin Portal
+                    </h1>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', margin: 0 }}>
+                        Restricted access — GoodMatter team only
+                    </p>
                 </div>
 
                 {/* Card */}
-                <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '2.5rem', backdropFilter: 'blur(20px)' }}>
-
+                <div style={{ background: 'var(--color-bg-surface)', padding: '2.5rem', borderRadius: '24px', boxShadow: 'var(--shadow-lg)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                     {error && (
-                        <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5', padding: '0.75rem 1rem', borderRadius: '10px', marginBottom: '1.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Lock size={14} /> {error}
+                        <div style={{ padding: '0.8rem 1rem', borderRadius: '10px', marginBottom: '1.5rem', fontSize: '0.88rem', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                             {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Email</label>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                placeholder="admin@goodmatter.com"
-                                style={inputStyle}
-                                onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.6)'}
-                                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.15)'}
-                            />
+                    <form onSubmit={handleLogin} style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ marginBottom: '1.25rem' }}>
+                            <label style={labelStyle}>Admin Email</label>
+                            <input type="email" placeholder="admin@goodmatter.com" required value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
                         </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                placeholder="••••••••••••"
-                                style={inputStyle}
-                                onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.6)'}
-                                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.15)'}
-                            />
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={labelStyle}>Password</label>
+                            <input type="password" placeholder="••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
                         </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            style={{
-                                padding: '0.9rem 1.5rem',
-                                background: loading ? 'rgba(99,102,241,0.5)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '12px',
-                                fontWeight: '700',
-                                fontSize: '0.95rem',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '0.5rem',
-                                marginTop: '0.5rem',
-                                boxShadow: '0 4px 20px rgba(99,102,241,0.3)',
-                                transition: 'opacity 0.2s',
-                            }}
-                        >
-                            {loading ? 'Authenticating...' : (<>Access Admin Panel <ArrowRight size={16} /></>)}
+                        
+                        <button type="submit" disabled={loading} style={{
+                            width: '100%', padding: '0.85rem', borderRadius: '12px', border: 'none',
+                            background: 'white', color: 'var(--color-primary)', fontWeight: '700', fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer',
+                            transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(255,255,255,0.1)'
+                        }}>
+                            {loading ? 'Authenticating...' : 'Sign In as Admin'}
                         </button>
                     </form>
-                </div>
 
-                {/* Back link */}
-                <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)' }}>
-                    Not an admin? <a href="/login" style={{ color: 'rgba(255,255,255,0.55)', textDecoration: 'none' }}>Investor Login →</a>
-                </p>
+                    <div style={{ display: 'flex', alignItems: 'center', margin: '1.5rem 0', color: 'rgba(255,255,255,0.1)' }}>
+                        <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                        <span style={{ padding: '0 1rem', fontSize: '0.85rem' }}>or</span>
+                        <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                        <GoogleLogin
+                            onSuccess={async (credentialResponse) => {
+                                setLoading(true);
+                                try {
+                                    const res = await fetch(`${API}/api/auth/google`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ idToken: credentialResponse.credential, intent: 'login' })
+                                    });
+                                    const data = await res.json();
+                                    if (res.ok && data.user?.role === 'ADMIN') {
+                                        localStorage.setItem('token', data.token);
+                                        localStorage.setItem('user', JSON.stringify(data.user));
+                                        navigate('/admin');
+                                    } else if (res.ok) {
+                                        setError('Access denied. Admin role required.');
+                                    } else {
+                                        setError(data.message || 'Google login failed');
+                                    }
+                                } catch (err) {
+                                    setError('Network error during Google login');
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}
+                            onError={() => setError('Google Login Failed')}
+                        />
+                    </div>
+
+                    <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                        Not an admin? <Link to="/login" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: '600' }}>Investor Login</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

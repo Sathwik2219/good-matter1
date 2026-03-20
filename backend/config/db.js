@@ -1,13 +1,29 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./database.sqlite');
+const path = require('path');
+const db = new sqlite3.Database(path.resolve(__dirname, '../database.sqlite'));
 
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS Users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    role TEXT NOT NULL
+    password_hash TEXT,
+    role TEXT NOT NULL,
+    is_verified INTEGER DEFAULT 0,
+    auth_provider TEXT DEFAULT 'email',
+    verification_token TEXT,
+    token_expiry DATETIME
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS Founders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT,
+    is_verified INTEGER DEFAULT 0,
+    auth_provider TEXT DEFAULT 'email',
+    verification_token TEXT,
+    token_expiry DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
   db.run(`CREATE TABLE IF NOT EXISTS Investors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,6 +84,7 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, startup_id)
   )`);
+
   db.run(`CREATE TABLE IF NOT EXISTS DealSubmissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     submitted_by TEXT NOT NULL,
@@ -85,6 +102,16 @@ db.serialize(() => {
     financial_projection TEXT,
     funding_amount TEXT,
     pitch_deck_url TEXT,
+    tam TEXT,
+    sam TEXT,
+    som TEXT,
+    cagr TEXT,
+    retention_metrics TEXT,
+    cac TEXT,
+    ltv TEXT,
+    competitors TEXT,
+    differentiation TEXT,
+    projections TEXT,
     status TEXT DEFAULT 'PENDING',
     filter_status TEXT DEFAULT 'PENDING',
     rejection_reason TEXT,
@@ -100,8 +127,112 @@ db.serialize(() => {
     ticket_size TEXT,
     bio TEXT,
     linkedin_url TEXT,
+    firm_name TEXT,
+    role TEXT,
+    geography TEXT,
+    stage_focus TEXT,
+    investment_type TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // Alter existing table to add missing columns (idempotent)
+  ['firm_name TEXT', 'role TEXT', 'geography TEXT', 'stage_focus TEXT', 'investment_type TEXT'].forEach(col => {
+    db.run(`ALTER TABLE InvestorProfiles ADD COLUMN ${col}`, () => {});
+  });
+
+  ['auth_provider TEXT DEFAULT "email"', 'verification_token TEXT', 'token_expiry DATETIME'].forEach(col => {
+    db.run(`ALTER TABLE Users ADD COLUMN ${col}`, () => {});
+    db.run(`ALTER TABLE Founders ADD COLUMN ${col}`, () => {});
+  });
+
+  [
+    'tam TEXT', 'sam TEXT', 'som TEXT', 'cagr TEXT', 'retention_metrics TEXT',
+    'cac TEXT', 'ltv TEXT', 'competitors TEXT', 'differentiation TEXT', 'projections TEXT',
+    'pitch_deck_file TEXT', 'tier TEXT', 'error_message TEXT',
+    'team_score INTEGER', 'market_score INTEGER', 'traction_score INTEGER',
+    'product_score INTEGER', 'competition_score INTEGER', 'financial_score INTEGER',
+    'analysis_json TEXT',
+    'needs_review INTEGER DEFAULT 0'   // ← new: flags low-confidence / invalid extractions
+  ].forEach(col => {
+    db.run(`ALTER TABLE DealSubmissions ADD COLUMN ${col}`, () => {});
+  });
+
+  db.run(`CREATE TABLE IF NOT EXISTS DealInterest (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deal_id INTEGER NOT NULL,
+    investor_id INTEGER NOT NULL,
+    status TEXT DEFAULT 'INTERESTED',
+    notified_admin INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(deal_id, investor_id)
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS Services (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    price INTEGER NOT NULL,
+    currency TEXT DEFAULT 'INR',
+    active INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS CartItems (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    service_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, service_id)
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS Payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    currency TEXT DEFAULT 'INR',
+    status TEXT DEFAULT 'PENDING',
+    payment_gateway_id TEXT,
+    payment_type TEXT DEFAULT 'SERVICE',
+    metadata TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS Subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    plan_name TEXT DEFAULT 'Priority Access',
+    price INTEGER DEFAULT 25000,
+    currency TEXT DEFAULT 'INR',
+    status TEXT DEFAULT 'ACTIVE',
+    renewal_date DATETIME,
+    payment_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS OTPs (
+    email TEXT PRIMARY KEY,
+    otp TEXT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+
+  // Seed services if empty
+  db.get('SELECT COUNT(*) as count FROM Services', [], (err, row) => {
+    if (!err && row && row.count === 0) {
+      const svcs = [
+        ['Pitch Deck Review', 'Expert review and feedback on your investor pitch deck', 15000, 'INR'],
+        ['Investor Introductions', 'Direct warm introductions to 3 matched investors', 35000, 'INR'],
+        ['Fundraising Support', 'End-to-end fundraise process support and advisory', 75000, 'INR'],
+        ['Deal Listing', 'List your startup on the GoodMatter curated deal room', 10000, 'INR'],
+        ['Financial Model', '3-5 year financial model and valuation analysis', 20000, 'INR'],
+        ['Pitch Deck Creation', 'Full professional pitch deck design and narrative', 25000, 'INR'],
+      ];
+      const stmt = db.prepare('INSERT INTO Services (name, description, price, currency) VALUES (?,?,?,?)');
+      svcs.forEach(s => stmt.run(s));
+      stmt.finalize();
+    }
+  });
   db.run(`CREATE TABLE IF NOT EXISTS DealMatches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     deal_id INTEGER NOT NULL,

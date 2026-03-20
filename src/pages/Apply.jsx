@@ -11,8 +11,10 @@ const Apply = () => {
 
     const inputStyle = {
         padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)',
-        border: '1px solid var(--color-secondary-dark)', outline: 'none',
+        border: '1px solid var(--color-bg-surface-light)', outline: 'none',
         width: '100%', fontFamily: 'inherit', fontSize: '0.9rem',
+        backgroundColor: 'var(--color-bg-surface-light)',
+        color: 'var(--color-text-main)',
         transition: 'border-color 0.2s',
     };
 
@@ -51,9 +53,9 @@ const Apply = () => {
     };
 
     if (submitted) return (
-        <div className="page-wrapper pt-20" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', backgroundColor: 'var(--color-secondary)' }}>
+        <div className="page-wrapper pt-20" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', backgroundColor: 'var(--color-bg-main)' }}>
             <div className="container">
-                <div style={{ maxWidth: '550px', margin: '0 auto', background: 'white', padding: '3rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', textAlign: 'center' }}>
+                <div style={{ maxWidth: '550px', margin: '0 auto', background: 'var(--color-bg-surface)', padding: '3rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
                     <h2 style={{ marginBottom: '0.75rem' }}>Application Submitted!</h2>
                     <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
@@ -61,8 +63,8 @@ const Apply = () => {
                         We'll respond within <strong>7 business days</strong>.
                     </p>
                     {submitted.score && (
-                        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem' }}>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#065f46' }}>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem' }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#10B981' }}>
                                 <strong>AI Pre-Screen Score: {submitted.score}/100</strong><br/>
                                 Our system has evaluated your startup based on industry, stage, and description.
                             </p>
@@ -75,19 +77,31 @@ const Apply = () => {
     );
 
     return (
-        <div className="page-wrapper pt-20" style={{ backgroundColor: 'var(--color-secondary)' }}>
+        <div className="page-wrapper pt-20" style={{ backgroundColor: 'var(--color-bg-main)' }}>
             <section className="section pb-0 text-center">
                 <div className="container animate-slide-up">
                     <h1 className="hero-title" style={{ color: 'var(--color-primary)' }}>Apply as Founder</h1>
-                    <p className="hero-subtitle mx-auto" style={{ maxWidth: '600px', margin: '0 auto 2rem', color: 'var(--color-text-muted)' }}>
+                    <p className="hero-subtitle mx-auto" style={{ maxWidth: '600px', margin: '0 auto 1.5rem', color: 'var(--color-text-muted)' }}>
                         Submit your startup for review. We evaluate every application and respond within 7 days.
                     </p>
+                    
+                    {/* Notion Submission Alert */}
+                    <div style={{ maxWidth: '720px', margin: '0 auto 2.5rem', background: 'rgba(234, 179, 8, 0.05)', border: '1px solid rgba(234, 179, 8, 0.2)', padding: '1.25rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem', textAlign: 'left' }}>
+                        <div style={{ fontSize: '1.5rem' }}>ℹ️</div>
+                        <p style={{ margin: 0, fontSize: '0.92rem', color: '#EAB308', lineHeight: '1.5' }}>
+                            <strong>Official Submission Path:</strong> For the most detailed review, please use our 
+                            <a href="https://www.notion.so/Selective-access-to-institutional-grade-opportunities-across-private-markets-30b28cf77ab680fca2a1cf32615b874f" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)', fontWeight: '700', textDecoration: 'underline', marginLeft: '4px' }}>
+                                Notion "Submit Your Deals" form
+                            </a>. 
+                            The form below serves as an express application.
+                        </p>
+                    </div>
                 </div>
             </section>
 
             <section className="section pt-0">
                 <div className="container">
-                    <div className="glass scroll-animate delay-100" style={{ maxWidth: '720px', margin: '0 auto', background: 'white', padding: '3rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
+                    <div className="glass scroll-animate delay-100" style={{ maxWidth: '720px', margin: '0 auto', background: 'var(--color-bg-surface)', padding: '3rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-xl)', border: '1px solid rgba(255,255,255,0.05)' }}>
 
                         {error && (
                             <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#b91c1c', padding: '0.75rem 1.25rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
@@ -99,7 +113,7 @@ const Apply = () => {
 
                             {/* Founder Details */}
                             <div>
-                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid var(--color-secondary-dark)', paddingBottom: '0.5rem' }}>Founder Details</h3>
+                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Founder Details</h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '1.25rem' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                         <label style={{ fontSize: '0.9rem', fontWeight: '500' }}>Full Name *</label>
@@ -118,7 +132,7 @@ const Apply = () => {
 
                             {/* Startup Details */}
                             <div>
-                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid var(--color-secondary-dark)', paddingBottom: '0.5rem' }}>Startup Details</h3>
+                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Startup Details</h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '1.25rem' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                         <label style={{ fontSize: '0.9rem', fontWeight: '500' }}>Company Name *</label>
@@ -130,7 +144,7 @@ const Apply = () => {
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                         <label style={{ fontSize: '0.9rem', fontWeight: '500' }}>Industry / Sector *</label>
-                                        <select name="industry" required style={{ ...inputStyle, backgroundColor: 'white' }}>
+                                        <select name="industry" required style={{ ...inputStyle, backgroundColor: 'var(--color-bg-surface-light)' }}>
                                             <option value="">Select industry</option>
                                             <option>Fintech</option>
                                             <option>HealthTech</option>
@@ -150,7 +164,7 @@ const Apply = () => {
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                         <label style={{ fontSize: '0.9rem', fontWeight: '500' }}>Current Stage *</label>
-                                        <select name="stage" required style={{ ...inputStyle, backgroundColor: 'white' }}>
+                                        <select name="stage" required style={{ ...inputStyle, backgroundColor: 'var(--color-bg-surface-light)' }}>
                                             <option value="">Select stage</option>
                                             <option>Pre-seed</option>
                                             <option>Seed</option>
@@ -171,7 +185,7 @@ const Apply = () => {
 
                             {/* Materials */}
                             <div>
-                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid var(--color-secondary-dark)', paddingBottom: '0.5rem' }}>Materials</h3>
+                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Materials</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                         <label style={{ fontSize: '0.9rem', fontWeight: '500' }}>Pitch Deck URL * <span style={{ fontWeight: '400', color: 'var(--color-text-muted)' }}>(Google Drive, Dropbox, DocSend)</span></label>

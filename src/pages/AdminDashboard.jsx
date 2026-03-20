@@ -8,21 +8,27 @@ import {
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const statusColors = {
-  PENDING:  { bg: '#fffbeb', color: '#f59e0b', label: 'Pending Review' },
-  APPROVED: { bg: '#ecfdf5', color: '#10b981', label: 'Approved' },
-  REJECTED: { bg: '#fef2f2', color: '#ef4444', label: 'Rejected' },
+  PENDING:  { bg: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24', label: 'Pending Review' },
+  APPROVED: { bg: 'rgba(16, 185, 129, 0.1)', color: '#10b981', label: 'Approved' },
+  REJECTED: { bg: 'rgba(239, 68, 68, 0.1)', color: '#f87171', label: 'Rejected' },
 };
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [legacySubs, setLegacySubs] = useState([]);
-  const [newDeals, setNewDeals]     = useState([]);
+  const [newDeals, setNewDeals]       = useState([]);
   const [investors, setInvestors]     = useState([]);
-  const [activeTab, setActiveTab]     = useState('deals'); // Default to new deals
+  const [interests, setInterests]     = useState([]);
+  const [activeTab, setActiveTab]     = useState('deals');
   const [loading, setLoading]         = useState(true);
   const [expanded, setExpanded]       = useState(null);
   const [actionMsg, setActionMsg]     = useState('');
+
+  // Create Investor form state
+  const [invForm, setInvForm] = useState({ name:'', email:'', firm_name:'', role:'', ticket_size:'', geography:'', bio:'' });
+  const [invLoading, setInvLoading] = useState(false);
+  const [invMsg, setInvMsg] = useState('');
 
   const token = localStorage.getItem('token');
   const user  = JSON.parse(localStorage.getItem('user') || '{}');
@@ -36,17 +42,19 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const [statsRes, legacyRes, newRes, invRes] = await Promise.all([
+      const [statsRes, legacyRes, newRes, invRes, intRes] = await Promise.all([
         fetch(`${API}/api/admin/stats`, { headers }),
-        fetch(`${API}/api/admin/submissions`, { headers }), // legacy
-        fetch(`${API}/api/admin/deals`, { headers }),       // new
+        fetch(`${API}/api/admin/submissions`, { headers }),
+        fetch(`${API}/api/admin/deals`, { headers }),
         fetch(`${API}/api/admin/investors`, { headers }),
+        fetch(`${API}/api/admin/interest-notifications`, { headers }),
       ]);
       if (!statsRes.ok) throw new Error('Auth failed');
       setStats(await statsRes.json());
       setLegacySubs(await legacyRes.json());
       setNewDeals(await newRes.json());
       setInvestors(await invRes.json());
+      setInterests(await intRes.json());
     } catch (e) {
       navigate('/admin/login');
     }
@@ -75,17 +83,29 @@ const AdminDashboard = () => {
   };
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-main)' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: '40px', height: '40px', border: '3px solid var(--color-accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }}></div>
-        <p style={{ color: 'var(--color-text-muted)' }}>Loading admin panel...</p>
+        <p style={{ color: 'var(--color-text-main)' }}>Loading admin panel...</p>
       </div>
       <style>{`@keyframes spin { to { transform:rotate(360deg); } }`}</style>
     </div>
   );
 
-  const cardStyle = { background: 'white', borderRadius: '16px', padding: '1.75rem', border: '1px solid rgba(11,15,26,0.07)', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' };
-  const tabStyle  = (active) => ({ padding: '0.6rem 1.4rem', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', background: active ? 'var(--color-primary)' : '#f1f5f9', color: active ? 'white' : 'var(--color-text-muted)', transition: 'all 0.2s' });
+  const cardStyle = { background: 'var(--color-bg-surface)', borderRadius: '16px', padding: '2rem', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' };
+  const tabStyle  = (active) => ({ 
+    padding: '0.75rem 1.75rem', 
+    borderRadius: '12px', 
+    border: active ? '1px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.1)', 
+    cursor: 'pointer', 
+    fontWeight: '800', 
+    fontSize: '0.85rem', 
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+    background: active ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', 
+    color: active ? '#818cf8' : 'var(--color-text-muted)', 
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+  });
 
   const SubmissionCard = ({ item, isNew }) => {
     const isExp = expanded === item.id;
@@ -97,10 +117,10 @@ const AdminDashboard = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>{item.startup_name}</h3>
-              <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: '700', background: sc.bg, color: sc.color }}>{sc.label}</span>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--color-text-main)' }}>{item.startup_name}</h3>
+              <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: '700', background: sc.bg, color: sc.color, border: `1px solid ${sc.color}44` }}>{sc.label}</span>
               {item.ai_score > 0 && (
-                <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: '700', background: item.ai_score >= 75 ? '#ecfdf5' : '#fffbeb', color: item.ai_score >= 75 ? '#10b981' : '#f59e0b' }}>
+                <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: '700', background: item.ai_score >= 75 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: item.ai_score >= 75 ? '#10b981' : '#fbbf24', border: `1px solid ${item.ai_score >= 75 ? '#10b981' : '#fbbf24'}44` }}>
                   AI Score: {item.ai_score}/100
                 </span>
               )}
@@ -125,7 +145,7 @@ const AdminDashboard = () => {
                 <ExternalLink size={13} /> Deck
               </a>
             )}
-            <button onClick={() => setExpanded(isExp ? null : item.id)} className="btn btn-sm" style={{ background: '#f1f5f9', color: 'var(--color-primary)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <button onClick={() => setExpanded(isExp ? null : item.id)} className="btn btn-sm" style={{ background: 'var(--color-bg-surface-light)', color: 'var(--color-text-main)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               {isExp ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               {isExp ? 'Less' : 'More'}
             </button>
@@ -133,7 +153,7 @@ const AdminDashboard = () => {
         </div>
 
         {isExp && (
-          <div style={{ marginTop: '1.25rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
+          <div style={{ marginTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.25rem' }}>
             <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
               {isNew ? (
                 <>
@@ -151,7 +171,7 @@ const AdminDashboard = () => {
                 
                 {/* 6 Category Scores (if new) */}
                 {isNew && ai.categories && (
-                  <div style={{ gridColumn: '1 / -1', background: '#f8fafc', borderRadius: '12px', padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', border: '1px solid #e2e8f0' }}>
+                  <div style={{ gridColumn: '1 / -1', background: 'var(--color-bg-surface-light)', borderRadius: '12px', padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
                     {Object.entries(ai.categories).map(([cat, score]) => (
                       <div key={cat} style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '0.2rem' }}>{cat}</div>
@@ -168,22 +188,22 @@ const AdminDashboard = () => {
                   </ul>
                 </div>
 
-                <div style={{ background: '#fef2f2', borderRadius: '12px', padding: '1.25rem', border: '1px solid #fecaca' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>⚠️ Risks</h4>
-                  <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#991b1b', fontSize: '0.85rem', lineHeight: '1.6' }}>
+                <div style={{ background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', padding: '1.25rem', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: '#f87171', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>⚠️ Risks</h4>
+                  <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#fca5a5', fontSize: '0.85rem', lineHeight: '1.6' }}>
                     {ai.risks?.map((r, i) => <li key={i}>{r}</li>)}
                   </ul>
                 </div>
 
-                <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.25rem', border: '1px solid #e2e8f0', gridColumn: 'span 1' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: 'var(--color-primary)' }}>📊 Market Opportunity</h4>
+                <div style={{ background: 'var(--color-bg-surface-light)', borderRadius: '12px', padding: '1.25rem', border: '1px solid rgba(255,255,255,0.05)', gridColumn: 'span 1' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: 'var(--color-text-main)' }}>📊 Market Opportunity</h4>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
                     {ai.marketOpportunity}
                   </p>
                 </div>
 
-                <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1.25rem', border: '1px solid #e2e8f0', gridColumn: 'span 1' }}>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: 'var(--color-primary)' }}>💡 Investment Potential</h4>
+                <div style={{ background: 'var(--color-bg-surface-light)', borderRadius: '12px', padding: '1.25rem', border: '1px solid rgba(255,255,255,0.05)', gridColumn: 'span 1' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', color: 'var(--color-text-main)' }}>💡 Investment Potential</h4>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
                     {ai.investmentPotential}
                   </p>
@@ -198,11 +218,11 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f4f6fb', paddingTop: '80px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-main)', paddingTop: '80px' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .dash-card { background: white; border-radius: 16px; padding: 1.75rem; border: 1px solid rgba(11,15,26,0.07); box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        .stat-number { font-size: 2rem; font-weight: 800; color: var(--color-primary); line-height: 1; }
+        .dash-card { background: var(--color-bg-surface); border-radius: 16px; padding: 1.75rem; border: 1px solid rgba(255,255,255,0.05); boxShadow: 0 4px 24px rgba(0,0,0,0.2); }
+        .stat-number { font-size: 2rem; font-weight: 800; color: var(--color-text-main); line-height: 1; }
         .stat-lbl { font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.4rem; font-weight: 500; }
         .intro-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
       `}</style>
@@ -216,12 +236,12 @@ const AdminDashboard = () => {
               <Shield size={22} style={{ color: 'white' }} />
             </div>
             <div>
-              <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '800' }}>Admin Panel</h1>
+              <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-text-main)' }}>Admin Panel</h1>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>GoodMatter Moderation Dashboard</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <Link to="/admin/register" className="btn btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#ecfdf5', color: '#10b981', border: '1px solid #10b981', textDecoration: 'none', padding: '0.5rem 1rem', borderRadius: '10px', fontWeight: '600', fontSize: '0.85rem' }}>
+            <Link to="/admin/register" className="btn btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', textDecoration: 'none', padding: '0.5rem 1rem', borderRadius: '10px', fontWeight: '600', fontSize: '0.85rem' }}>
               + Create Admin
             </Link>
             <button onClick={() => { localStorage.clear(); navigate('/admin/login'); }} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -250,7 +270,7 @@ const AdminDashboard = () => {
                   <Icon size={22} style={{ color }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--color-primary)', lineHeight: 1 }}>{value}</div>
+                  <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--color-text-main)', lineHeight: 1 }}>{value}</div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>{label}</div>
                 </div>
               </div>
@@ -268,6 +288,12 @@ const AdminDashboard = () => {
           </button>
           <button style={tabStyle(activeTab === 'investors')} onClick={() => setActiveTab('investors')}>
             👥 Investors ({investors.length})
+          </button>
+          <button style={tabStyle(activeTab === 'interests')} onClick={() => setActiveTab('interests')}>
+            🔔 Interests {interests.length > 0 && <span style={{ background: '#ef4444', color: 'white', borderRadius: '999px', padding: '1px 7px', fontSize: '0.72rem', marginLeft: '4px' }}>{interests.length}</span>}
+          </button>
+          <button style={tabStyle(activeTab === 'create-investor')} onClick={() => setActiveTab('create-investor')}>
+            ➕ Create Investor
           </button>
         </div>
 
@@ -297,23 +323,25 @@ const AdminDashboard = () => {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', minWidth: '520px' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
-                  {['Name', 'Email', 'Role', 'Intro Requests'].map(h => (
+                <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.05)' }}>
+                  {['Name', 'Firm', 'Email', 'Geography', 'Ticket Size', 'Interests'].map(h => (
                     <th key={h} style={{ textAlign: 'left', padding: '0.75rem', color: 'var(--color-text-muted)', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {investors.map(inv => (
-                  <tr key={inv.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                    <td style={{ padding: '0.85rem 0.75rem', fontWeight: '600' }}>{inv.name}</td>
+                  <tr key={inv.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                    <td style={{ padding: '0.85rem 0.75rem', fontWeight: '600', color: 'var(--color-text-main)' }}>{inv.name}</td>
+                    <td style={{ padding: '0.85rem 0.75rem', color: 'var(--color-text-muted)' }}>{inv.firm_name || '—'}</td>
                     <td style={{ padding: '0.85rem 0.75rem', color: 'var(--color-text-muted)' }}>{inv.email}</td>
-                    <td style={{ padding: '0.85rem 0.75rem' }}><span style={{ background: '#eef2ff', color: '#6366f1', padding: '2px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700' }}>{inv.role}</span></td>
-                    <td style={{ padding: '0.85rem 0.75rem', color: 'var(--color-text-muted)' }}>{inv.intro_requests || 0}</td>
+                    <td style={{ padding: '0.85rem 0.75rem', color: 'var(--color-text-muted)' }}>{inv.geography || '—'}</td>
+                    <td style={{ padding: '0.85rem 0.75rem', color: 'var(--color-text-muted)' }}>{inv.ticket_size || '—'}</td>
+                    <td style={{ padding: '0.85rem 0.75rem', color: 'var(--color-text-muted)' }}>{inv.interest_count || 0}</td>
                   </tr>
                 ))}
                 {investors.length === 0 && (
-                  <tr><td colSpan="4" style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No investors yet.</td></tr>
+                  <tr><td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>No investors yet. Create one using the ➕ tab.</td></tr>
                 )}
               </tbody>
             </table>
@@ -321,9 +349,118 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* ── Interests / Notifications Tab ── */}
+        {activeTab === 'interests' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', margin: '0 0 0.5rem' }}>
+              Investors who have expressed interest in deals. Manually coordinate introductions between investor and founder.
+            </p>
+            {interests.length === 0 && <div style={{ ...cardStyle, textAlign: 'center', padding: '4rem', color: 'var(--color-text-muted)' }}>No investor interests recorded yet.</div>}
+            {interests.map(item => (
+              <div key={item.id} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <p style={{ margin: 0, fontWeight: '700', color: 'var(--color-text-main)', marginBottom: '0.25rem' }}>
+                    {item.investor_name} {item.firm_name ? `(${item.firm_name})` : ''}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                    {item.investor_email} · Interested in: <strong style={{ color: 'var(--color-text-main)' }}>{item.startup_name}</strong>
+                  </p>
+                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                    AI Score: {item.ai_score}/100 · {new Date(item.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <a
+                  href={`mailto:${item.investor_email}?subject=GoodMatter Introduction - ${item.startup_name}&body=Hi ${item.investor_name},%0A%0AThank you for your interest in ${item.startup_name}. We are coordinating the introduction.%0A%0ABest,\nGoodMatter Team`}
+                  style={{ padding: '0.5rem 1.25rem', borderRadius: '10px', background: 'rgba(99,102,241,0.1)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.2)', textDecoration: 'none', fontWeight: '600', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+                >
+                  ✉️ Email Investor
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Create Investor Tab ── */}
+        {activeTab === 'create-investor' && (
+          <div style={cardStyle}>
+            <h2 style={{ color: 'var(--color-text-main)', margin: '0 0 0.5rem', fontSize: '1.3rem' }}>➕ Create Investor Account</h2>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+              Investor accounts are invitation-only and must be created by admin. The investor can then log in with these credentials.
+            </p>
+
+            {invMsg && (
+              <div style={{ background: invMsg.includes('created') ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${invMsg.includes('created') ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`, color: invMsg.includes('created') ? '#10b981' : '#f87171', padding: '0.75rem 1rem', borderRadius: '10px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                {invMsg}
+              </div>
+            )}
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setInvLoading(true);
+                setInvMsg('');
+                try {
+                  const res = await fetch(`${API}/api/admin/create-investor`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify(invForm),
+                  });
+                  const data = await res.json();
+                  setInvMsg(data.message || (res.ok ? 'Investor account created!' : 'Failed'));
+                  if (res.ok) {
+                    setInvForm({ name:'', email:'', firm_name:'', role:'', ticket_size:'', geography:'', bio:'' });
+                    fetchAll();
+                  }
+                } catch { setInvMsg('Server error.'); }
+                setInvLoading(false);
+              }}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}
+            >
+              {[
+                { key:'name', label:'Full Name', required: true, ph:'Jane Smith' },
+                { key:'email', label:'Email Address', required: true, ph:'jane@firm.com', type:'email' },
+                { key:'firm_name', label:'Firm / Organization', ph:'Sequoia Capital' },
+                { key:'role', label:'Role / Title', ph:'Managing Partner' },
+                { key:'ticket_size', label:'Ticket Size', ph:'₹25L – ₹5Cr' },
+                { key:'geography', label:'Geography Focus', ph:'Pan India, SEA, US' },
+              ].map(({ key, label, required, ph, type='text' }) => (
+                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {label}{required && <span style={{ color: '#ef4444', marginLeft: 3 }}>*</span>}
+                  </label>
+                  <input
+                    type={type}
+                    required={required}
+                    placeholder={ph}
+                    value={invForm[key]}
+                    onChange={e => setInvForm(f => ({ ...f, [key]: e.target.value }))}
+                    style={{ padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', outline: 'none', fontFamily: 'inherit', fontSize: '0.9rem', background: 'var(--color-bg-surface-light)', color: 'var(--color-text-main)', boxSizing: 'border-box' }}
+                  />
+                </div>
+              ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', gridColumn: '1 / -1' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Bio / Notes</label>
+                <textarea
+                  placeholder="Investment thesis, focus areas, or any notes..."
+                  value={invForm.bio}
+                  onChange={e => setInvForm(f => ({ ...f, bio: e.target.value }))}
+                  rows={3}
+                  style={{ padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', outline: 'none', fontFamily: 'inherit', fontSize: '0.9rem', background: 'var(--color-bg-surface-light)', color: 'var(--color-text-main)', resize: 'vertical', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <button type="submit" disabled={invLoading} className="btn btn-primary" style={{ padding: '0.75rem 2rem', opacity: invLoading ? 0.7 : 1 }}>
+                  {invLoading ? 'Creating...' : '➕ Create Investor Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
       </div>
     </div>
   );
+
 };
 
 export default AdminDashboard;

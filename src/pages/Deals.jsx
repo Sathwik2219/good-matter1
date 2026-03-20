@@ -76,19 +76,19 @@ const Deals = () => {
 
     if (loading) {
         return (
-            <div className="page-wrapper pt-20" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-                <p>Loading secure dealflow...</p>
+            <div className="page-wrapper pt-20" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', background: 'var(--color-bg-main)' }}>
+                <p style={{ color: 'var(--color-text-main)' }}>Loading secure dealflow...</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="page-wrapper pt-20 text-center">
-                <section className="section bg-light" style={{ paddingBottom: '3rem', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="page-wrapper pt-20 text-center" style={{ background: 'var(--color-bg-main)' }}>
+                <section className="section" style={{ paddingBottom: '3rem', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     <div className="container animate-slide-up">
-                        <div className="hero-badge" style={{ color: 'red', borderColor: 'red' }}>Access Restricted</div>
-                        <h1 className="hero-title" style={{ color: 'var(--color-primary)' }}>Secure Deal Room</h1>
+                        <div className="hero-badge" style={{ color: '#ef4444', borderColor: '#ef4444' }}>Access Restricted</div>
+                        <h1 className="hero-title" style={{ color: 'var(--color-text-main)' }}>Secure Deal Room</h1>
                         <p className="hero-subtitle mx-auto" style={{ maxWidth: '700px', margin: '0 auto 2rem', color: 'var(--color-text-muted)' }}>
                             {error}
                         </p>
@@ -102,22 +102,22 @@ const Deals = () => {
     }
 
     return (
-        <div className="page-wrapper pt-20">
-            <section className="section bg-light text-center" style={{ paddingBottom: '3rem' }}>
+        <div className="page-wrapper pt-20" style={{ background: 'var(--color-bg-main)' }}>
+            <section className="section text-center" style={{ paddingBottom: '3rem' }}>
                 <div className="container animate-slide-up">
-                    <div className="hero-badge" style={{ color: 'var(--color-highlight)', borderColor: 'var(--color-highlight)' }}>Live Pipeline</div>
-                    <h1 className="hero-title" style={{ color: 'var(--color-primary)' }}>Active Deals</h1>
+                    <div className="hero-badge" style={{ color: 'var(--color-accent)', borderColor: 'var(--color-accent)' }}>Live Pipeline</div>
+                    <h1 className="hero-title" style={{ color: 'var(--color-text-main)' }}>Active Deals</h1>
                     <p className="hero-subtitle mx-auto" style={{ maxWidth: '700px', margin: '0 auto 2rem', color: 'var(--color-text-muted)' }}>
                         You are viewing the private, curated dealflow matching your current investment thesis.
                     </p>
                 </div>
             </section>
 
-            <section className="section bg-secondary">
+            <section className="section" style={{ background: 'var(--color-bg-deep)' }}>
                 <div className="container">
                     {deals.length === 0 ? (
                         <div className="text-center py-10">
-                            <p className="text-xl text-gray-500">There are currently no active deals on the platform.</p>
+                            <p className="text-xl" style={{ color: 'var(--color-text-muted)' }}>There are currently no active deals on the platform.</p>
                         </div>
                     ) : (
                         <div className="deals-grid">

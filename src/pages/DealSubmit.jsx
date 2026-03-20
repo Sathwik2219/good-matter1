@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { CheckCircle, Send, FileUp, Link2, ArrowRight, Lock, Trash2, AlertCircle } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -11,230 +11,269 @@ const INDUSTRIES = [
 ];
 const STAGES = ['Pre-seed','Seed','Pre-Series A','Series A','Series B+'];
 
-const Section = ({ title, children }) => (
-  <div style={{ marginBottom: '2rem' }}>
-    <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid #eef2ff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      {title}
-    </h3>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-      {children}
-    </div>
-  </div>
-);
+const inp = {
+  width: '100%', padding: '0.85rem 1rem', background: '#1C2436',
+  border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px',
+  color: 'var(--color-text-main)', outline: 'none', fontFamily: 'inherit',
+  fontSize: '0.92rem', boxSizing: 'border-box', transition: 'all 0.2s',
+};
+const sel = { ...inp, cursor: 'pointer', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', paddingRight: '2.5rem' };
 
-const Field = ({ label, required, children, full }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', gridColumn: full ? '1 / -1' : 'auto' }}>
-    <label style={{ fontSize: '0.82rem', fontWeight: '600', color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-      {label}{required && <span style={{ color: '#ef4444', marginLeft: '3px' }}>*</span>}
+const Field = ({ label, required, hint, children }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+    <label style={{ fontSize: '0.75rem', fontWeight: '750', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+      {label}{required && <span style={{ color: '#ef4444', marginLeft: 3 }}>*</span>}
+      {hint && <span style={{ fontWeight: '400', textTransform: 'none', marginLeft: 6, opacity: 0.7 }}>({hint})</span>}
     </label>
     {children}
   </div>
 );
 
 const DealSubmit = () => {
-  useScrollAnimation();
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+  const [result, setResult]         = useState(null);
+  const [error, setError]           = useState('');
+  const [isAuth, setIsAuth]         = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  
+  // File state for UI feedback
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const inputStyle = {
-    padding: '0.75rem 1rem', borderRadius: '10px',
-    border: '1px solid #e2e8f0', outline: 'none',
-    fontFamily: 'inherit', fontSize: '0.9rem', width: '100%',
-    transition: 'border-color 0.2s, box-shadow 0.2s', boxSizing: 'border-box',
-    background: 'white',
+  const token = localStorage.getItem('token');
+  const user  = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; } })();
+
+  useEffect(() => {
+    // Require FOUNDER login
+    if (token && user?.role === 'FOUNDER') {
+      setIsAuth(true);
+    } else {
+      localStorage.setItem('gm_redirect_after_login', '/submit-deal');
+    }
+    setCheckingAuth(false);
+  }, [token, user?.role]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+    }
   };
-  const textareaStyle = { ...inputStyle, resize: 'vertical', minHeight: '90px' };
-  const selectStyle   = { ...inputStyle, backgroundColor: 'white', cursor: 'pointer' };
 
-  const focus = e => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)'; };
-  const blur  = e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; };
+  const clearFile = () => {
+    setSelectedFile(null);
+    const input = document.getElementById('pitch_deck_file_input');
+    if (input) input.value = '';
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true); setError('');
-    const fd = new FormData(e.target);
-    const payload = Object.fromEntries(fd.entries());
-
+    console.log('[DEBUG] Starting Submission...');
+    setSubmitting(true);
+    setError('');
+    
     try {
-      const res  = await fetch(`${API}/api/founder/submit-deal`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      const formData = new FormData(e.target);
+      
+      // Safety defaults
+      if (!formData.get('submitted_by')?.trim() && user?.name) formData.set('submitted_by', user.name);
+      if (!formData.get('email')?.trim() && user?.email) formData.set('email', user.email);
+
+      const res = await fetch(`${API}/api/founder/submit-deal`, { 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData 
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Submission failed. Please check all fields.');
+      }
+
       setResult(data);
     } catch (err) {
+      console.error('Submission Error:', err);
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
-  // --- Success Screen ---
-  if (result) {
-    const isRejected = result.filter_status === 'AUTO_REJECTED';
-    const isReview   = result.filter_status === 'REVIEW_NEEDED';
-    const isApproved = result.filter_status === 'ELIGIBLE';
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f6fb', paddingTop: '80px', padding: '6rem 1.5rem 2rem' }}>
-        <div style={{ maxWidth: '540px', width: '100%', background: 'white', borderRadius: '24px', padding: '3rem', boxShadow: '0 8px 40px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>
-            {isApproved ? '🚀' : isReview ? '📋' : '❌'}
-          </div>
-          <h2 style={{ marginBottom: '0.75rem', color: 'var(--color-primary)' }}>
-            {isApproved ? 'Deal Eligible!' : isReview ? 'Under Review' : 'Not a Fit Right Now'}
-          </h2>
-          <p style={{ color: 'var(--color-text-muted)', lineHeight: '1.7', marginBottom: '1.5rem' }}>
-            {result.message}
-          </p>
+  if (checkingAuth) return null;
 
-          {/* AI Score Display */}
-          <div style={{ background: isApproved ? '#f0fdf4' : isReview ? '#fffbeb' : '#fef2f2', border: `1px solid ${isApproved ? '#bbf7d0' : isReview ? '#fde68a' : '#fca5a5'}`, borderRadius: '14px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-            <p style={{ margin: '0 0 0.5rem', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: isApproved ? '#16a34a' : isReview ? '#92400e' : '#b91c1c' }}>
-              AI Investment Readiness Score
-            </p>
-            <div style={{ fontSize: '3rem', fontWeight: '900', color: isApproved ? '#16a34a' : isReview ? '#f59e0b' : '#ef4444', lineHeight: 1 }}>
-              {result.ai_score}<span style={{ fontSize: '1.2rem', fontWeight: '600' }}>/100</span>
-            </div>
-            <p style={{ margin: '0.5rem 0 0', fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
-              {isApproved ? 'Strong candidate — matched to relevant investors' : isReview ? 'Manual review required before investor distribution' : 'Score below threshold — does not meet current criteria'}
-            </p>
-          </div>
-
-          <button onClick={() => navigate('/')} className="btn btn-primary" style={{ width: '100%' }}>
-            Back to Home
-          </button>
+  if (!isAuth) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '100px 1.5rem 3rem', background: 'var(--color-bg-main)' }}>
+      <div style={{ maxWidth: '440px', width: '100%', textAlign: 'center', background: 'var(--color-bg-surface)', borderRadius: '24px', padding: '3rem', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ width: '60px', height: '60px', background: 'rgba(239,68,68,0.12)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <Lock size={28} style={{ color: '#f87171' }} />
+        </div>
+        <h2 style={{ color: 'var(--color-text-main)', marginBottom: '0.75rem' }}>Founder Login Required</h2>
+        <p style={{ color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: 1.7 }}>You need a founder account to submit a deal. Please sign in or create an account.</p>
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/founder/login" className="btn btn-primary">Sign In / Sign Up</Link>
+          <Link to="/" className="btn btn-outline">Back to Home</Link>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
-  // --- Submission Form ---
-  return (
-    <div style={{ background: '#f4f6fb', paddingTop: '72px' }}>
-      {/* Hero */}
-      <section style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #1e3a5f 100%)', padding: '4rem 1.5rem 3rem', textAlign: 'center' }}>
-        <div className="container">
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.1)', padding: '6px 16px', borderRadius: '20px', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', fontWeight: '600', letterSpacing: '0.05em', textTransform: 'uppercase' }}>AI-Evaluated Deal Submission</span>
-          </div>
-          <h1 style={{ color: 'white', fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontWeight: '900', margin: '0 0 1rem' }}>Submit Your Deal</h1>
-          <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '1.05rem', maxWidth: '560px', margin: '0 auto' }}>
-            Every submission is evaluated by our AI scoring engine across 6 dimensions. High-quality deals are matched directly with relevant investors.
+  if (result) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '100px 1.5rem 3rem', background: 'var(--color-bg-main)' }}>
+      <div style={{ maxWidth: '580px', width: '100%', textAlign: 'center', background: 'var(--color-bg-surface)', borderRadius: '24px', padding: '3rem', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}>
+        <div style={{ width: '72px', height: '72px', background: 'rgba(16,185,129,0.12)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <CheckCircle size={36} style={{ color: '#10b981' }} />
+        </div>
+        <h2 style={{ color: 'var(--color-text-main)', marginBottom: '0.75rem' }}>Deal Submitted!</h2>
+        <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: '14px', padding: '1.25rem', marginBottom: '2rem', textAlign: 'left' }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--color-text-muted)', lineHeight: 1.7, margin: 0 }}>
+            <strong style={{ color: '#818cf8' }}>AI Evaluation in Progress</strong><br /><br />
+            Our AI is now analyzing your pitch deck. This usually takes 30–120 seconds.
+            Your score will appear in your dashboard shortly.
           </p>
-          {/* Score badges */}
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-            {['Team','Market','Product','Traction','Financials','Competition'].map(dim => (
-              <span key={dim} style={{ padding: '4px 14px', background: 'rgba(255,255,255,0.12)', borderRadius: '20px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.75)', fontWeight: '600' }}>{dim}</span>
-            ))}
-          </div>
         </div>
-      </section>
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/founder/dashboard" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            Go to Dashboard <ArrowRight size={15} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 
-      {/* Form */}
-      <section style={{ padding: '3rem 1.5rem 4rem' }}>
-        <div className="container" style={{ maxWidth: '860px', margin: '0 auto' }}>
-          <div style={{ background: 'white', borderRadius: '20px', padding: 'clamp(1.5rem, 4vw, 3rem)', boxShadow: '0 4px 30px rgba(0,0,0,0.08)' }}>
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-main)', paddingTop: '80px' }}>
+      <style>{`
+        input:focus, select:focus, textarea:focus { border-color: var(--color-accent) !important; background: #242D42 !important; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
+        option { background: #1C2436; color: white; padding: 10px; }
+      `}</style>
 
-            {error && (
-              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#b91c1c', padding: '0.75rem 1.25rem', borderRadius: '10px', marginBottom: '2rem', fontSize: '0.9rem' }}>
-                ⚠️ {error}
-              </div>
-            )}
+      {/* Header */}
+      <div style={{ background: 'linear-gradient(135deg, var(--color-bg-deep) 0%, #151a2e 100%)', padding: '4rem 1.5rem 3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '20px', padding: '6px 16px', fontSize: '0.78rem', color: '#818cf8', fontWeight: '700', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <Send size={12} /> New Submission
+        </div>
+        <h1 style={{ color: 'var(--color-text-main)', fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', letterSpacing: '-0.03em' }}>Submit Your Startup</h1>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', maxWidth: '580px', margin: '0 auto', lineHeight: 1.6 }}>
+          Join the GoodMatter network. Upload your pitch deck for instant AI analysis and institutional matching.
+        </p>
+      </div>
 
-            <form onSubmit={handleSubmit}>
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '3rem 1.5rem 5rem' }}>
+        <div style={{ background: 'var(--color-bg-surface)', borderRadius: '28px', padding: '3rem', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
 
-              <Section title="👤 Submitter Details">
-                <Field label="Your Full Name" required>
-                  <input name="submitted_by" type="text" required placeholder="Jane Smith" style={inputStyle} onFocus={focus} onBlur={blur} />
-                </Field>
-                <Field label="Email Address" required>
-                  <input name="email" type="email" required placeholder="you@example.com" style={inputStyle} onFocus={focus} onBlur={blur} />
-                </Field>
-              </Section>
+          {error && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}><AlertCircle size={18} /> {error}</div>}
 
-              <Section title="🚀 Startup Overview">
-                <Field label="Startup Name" required>
-                  <input name="startup_name" type="text" required placeholder="e.g. Acme AI" style={inputStyle} onFocus={focus} onBlur={blur} />
-                </Field>
-                <Field label="Industry / Sector" required>
-                  <select name="industry" required style={selectStyle} onFocus={focus} onBlur={blur}>
-                    <option value="">Select industry</option>
-                    {INDUSTRIES.map(i => <option key={i}>{i}</option>)}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <input id="pitch_deck_file_input" name="pitch_deck_file" type="file" accept=".pdf" style={{ display: 'none' }} onChange={handleFileChange} />
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+              <Field label="Founder Name" required>
+                <input name="submitted_by" required placeholder="Full name" style={inp} defaultValue={user?.name || ''} />
+              </Field>
+              <Field label="Direct Email" required>
+                <input name="email" type="email" required placeholder="name@startup.com" style={inp} defaultValue={user?.email || ''} />
+              </Field>
+            </div>
+
+            <Field label="Startup Name" required>
+              <input name="startup_name" required placeholder="e.g. Acme AI" style={inp} />
+            </Field>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <Field label="Industry Sector" required>
+                <div style={{ position: 'relative' }}>
+                  <select name="industry" required style={sel} defaultValue="">
+                    <option value="" disabled>Select Sector</option>
+                    {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                   </select>
-                </Field>
-                <Field label="Funding Stage" required>
-                  <select name="stage" required style={selectStyle} onFocus={focus} onBlur={blur}>
-                    <option value="">Select stage</option>
-                    {STAGES.map(s => <option key={s}>{s}</option>)}
-                  </select>
-                </Field>
-                <Field label="Funding Amount Sought">
-                  <input name="funding_amount" type="text" placeholder="e.g. ₹5Cr / $500K" style={inputStyle} onFocus={focus} onBlur={blur} />
-                </Field>
-              </Section>
-
-              <Section title="🎯 Problem & Solution">
-                <Field label="Problem Statement" required full>
-                  <textarea name="problem" required rows={3} placeholder="What specific problem are you solving? Who faces this problem?" style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-                <Field label="Solution & Product" required full>
-                  <textarea name="solution" required rows={3} placeholder="Describe your solution, how it works, and what makes it unique..." style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-              </Section>
-
-              <Section title="📊 Market">
-                <Field label="Market Size (TAM / SAM / SOM)" required full>
-                  <textarea name="market_size" required rows={2} placeholder="e.g. TAM: $50B, SAM: $5B, SOM: $500M. Include CAGR if known." style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-                <Field label="Business Model" full>
-                  <textarea name="business_model" rows={2} placeholder="e.g. SaaS subscription, marketplace, D2C, transaction fee..." style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-              </Section>
-
-              <Section title="📈 Traction & Metrics">
-                <Field label="Current Traction" full>
-                  <textarea name="traction" rows={2} placeholder="Users, revenue, clients, partnerships, waitlist size, growth rate..." style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-                <Field label="Revenue Metrics" full>
-                  <textarea name="revenue_metrics" rows={2} placeholder="ARR, MRR, LTV, CAC, Gross Margin, Conversion Rate..." style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-              </Section>
-
-              <Section title="⚔️ Competitive Landscape">
-                <Field label="Competitors & Your Moat" full required>
-                  <textarea name="competition" required rows={3} placeholder="List key competitors. What is your unfair advantage, moat, or barrier to entry?" style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-              </Section>
-
-              <Section title="💰 Financials">
-                <Field label="Financial Projections" full>
-                  <textarea name="financial_projection" rows={2} placeholder="3-year projections, path to profitability, key milestones..." style={textareaStyle} onFocus={focus} onBlur={blur}></textarea>
-                </Field>
-                <Field label="Pitch Deck URL" required full>
-                  <input name="pitch_deck_url" type="url" required placeholder="https://drive.google.com/... or DocSend / Dropbox link" style={inputStyle} onFocus={focus} onBlur={blur} />
-                </Field>
-              </Section>
-
-              {/* Submit */}
-              <div style={{ marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
-                <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                  🤖 <span>Your submission will be instantly scored by our <strong>AI evaluation engine</strong> across 6 categories. Deals scoring above 70 are automatically eligible for investor distribution.</span>
                 </div>
-                <button type="submit" disabled={submitting} className="btn btn-accent btn-lg" style={{ width: '100%', opacity: submitting ? 0.7 : 1, fontSize: '1rem', padding: '1rem' }}>
-                  {submitting ? '🔄 Analyzing your startup...' : '🚀 Submit for AI Evaluation'}
-                </button>
-                <p style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
-                  Response within 7 business days. All submissions are reviewed by the GoodMatter team.
-                </p>
-              </div>
+              </Field>
+              <Field label="Funding Stage" required>
+                <div style={{ position: 'relative' }}>
+                  <select name="stage" required style={sel} defaultValue="">
+                    <option value="" disabled>Current Stage</option>
+                    {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </Field>
+            </div>
 
-            </form>
-          </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <Field label="Total Raising" required hint="e.g. ₹2Cr or $1M">
+                <input name="funding_amount" required placeholder="Capital requested" style={inp} />
+              </Field>
+              <Field label="Startup Website" hint="Optional">
+                <input name="website" placeholder="https://..." style={inp} />
+              </Field>
+            </div>
+
+            <Field label="Elevator Pitch" required hint="Max 200 characters">
+              <textarea name="description" required placeholder="Problem you solve in one sentence..." style={{ ...inp, minHeight: '100px', resize: 'vertical' }} />
+            </Field>
+
+            {/* Deck upload wrapper */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '20px', padding: '2rem', textAlign: 'center', transition: 'all 0.3s' }}>
+               <div style={{ marginBottom: '1.5rem' }}>
+                 <div style={{ width: '50px', height: '50px', background: 'rgba(99,102,241,0.1)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                   <FileUp size={24} style={{ color: 'var(--color-accent)' }} />
+                 </div>
+                 <h4 style={{ fontSize: '1rem', fontWeight: '700', margin: '0 0 0.25rem' }}>Pitch Deck (PDF)</h4>
+                 <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>Maximum file size: 30MB</p>
+               </div>
+
+               {!selectedFile ? (
+                  <button type="button" onClick={() => document.getElementById('pitch_deck_file_input').click()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 2rem', background: 'var(--color-accent)', color: 'white', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', border: 'none', fontSize: '0.9rem', transition: 'all 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-accent-hover)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'var(--color-accent)'}>
+                    Choose PDF File
+                  </button>
+               ) : (
+                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', padding: '0.75rem 1.25rem', borderRadius: '12px', maxWidth: '400px', margin: '0 auto' }}>
+                   <CheckCircle size={18} style={{ color: '#10b981' }} />
+                   <span style={{ fontSize: '0.9rem', color: '#34d399', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                     {selectedFile.name}
+                   </span>
+                   <button type="button" onClick={clearFile} style={{ color: 'rgba(255,255,255,0.3)', hover: { color: '#f87171' }, transition: 'color 0.2s' }} 
+                     onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
+                     onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
+                     <Trash2 size={16} />
+                   </button>
+                 </div>
+               )}
+               
+               <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                 <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.05)' }} />
+                 <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)', fontWeight: '700' }}>OR</span>
+                 <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.05)' }} />
+               </div>
+
+               <div style={{ marginTop: '1.25rem', position: 'relative' }}>
+                 <Link2 size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+                 <input name="pitch_deck_url" type="url" placeholder="DocSend / Google Drive Link" style={{ ...inp, paddingLeft: '2.75rem', fontSize: '0.85rem' }} />
+               </div>
+            </div>
+
+            <button type="submit" disabled={submitting} className="btn btn-primary"
+              style={{ width: '100%', padding: '1.1rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.6rem', fontSize: '1.05rem', fontWeight: '800', opacity: submitting ? 0.7 : 1, borderRadius: '14px' }}>
+              {submitting ? (
+                <>
+                  <div style={{ width: '18px', height: '18px', border: '2.5px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  Uploading Deal...
+                </>
+              ) : (
+                <>Analyze My Startup <ArrowRight size={20} /></>
+              )}
+            </button>
+            
+            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'center', margin: 0, opacity: 0.6 }}>
+              Safe & Confidential. Your data is only shared with verified institutional investors.
+            </p>
+          </form>
         </div>
-      </section>
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

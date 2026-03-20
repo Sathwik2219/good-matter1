@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { LineChart, Users, Sparkles, MessageSquare } from 'lucide-react';
+import { LineChart, Users, Sparkles, MessageSquare, ArrowRight } from 'lucide-react';
 
 const Founders = () => {
     useScrollAnimation();
@@ -32,22 +32,22 @@ const Founders = () => {
     return (
         <div className="page-wrapper pt-20">
             {/* Hero */}
-            <section className="section section-dark text-center">
+            <section className="section text-center" style={{ padding: '8rem 0 4rem' }}>
                 <div className="container animate-slide-up">
-                    <div className="hero-badge">For Founders</div>
-                    <h1 className="hero-title">Impact Studio for Founders</h1>
-                    <p className="hero-subtitle mx-auto" style={{ maxWidth: '700px', margin: '0 auto 2rem' }}>
+                    <div className="hero-badge mx-auto">For Founders</div>
+                    <h1 className="hero-title">Bespoke Strategic <span className="text-highlight">Access</span></h1>
+                    <p className="hero-subtitle mx-auto" style={{ maxWidth: '700px', margin: '0 auto 3rem' }}>
                         Get your startup in front of a highly curated network of active investors who are aligned with your vision.
                     </p>
                     <div className="hero-actions justify-center">
-                        <Link to="/apply" className="btn btn-accent btn-lg">Apply for Funding</Link>
-                        <Link to="/impact-studio" className="btn btn-outline-light btn-lg">Explore Services</Link>
+                        <Link to="/founder/login" className="btn btn-primary btn-lg">Apply for Funding</Link>
+                        <Link to="/studio" className="btn btn-outline btn-lg">Explore Studio <ArrowRight size={20} /></Link>
                     </div>
                 </div>
             </section>
 
             {/* Process Timeline */}
-            <section className="section bg-white text-center">
+            <section className="section bg-deep text-center">
                 <div className="container scroll-animate">
                     <h2>The GoodMatter Process</h2>
                     <p className="section-subtitle mt-4 mb-4" style={{ margin: '1rem auto 4rem' }}>A streamlined path from application to investment.</p>
@@ -59,8 +59,8 @@ const Founders = () => {
                             { step: '3', title: 'Deal Memo Creation', desc: 'We craft a professional investment memo highlighting your strengths.' },
                             { step: '4', title: 'Investor Introductions', desc: 'Your deal is pushed to our private network, opening direct lines of communication.' },
                         ].map((item, index) => (
-                            <div key={index} style={{ display: 'flex', gap: '1.5rem', background: 'var(--color-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-md)' }} className={`scroll-animate delay-${(index + 1) * 100}`}>
-                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>
+                            <div key={index} style={{ display: 'flex', gap: '1.5rem', background: 'var(--color-bg-surface)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.05)' }} className={`scroll-animate delay-${(index + 1) * 100}`}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>
                                     {item.step}
                                 </div>
                                 <div>
@@ -74,7 +74,7 @@ const Founders = () => {
             </section>
 
             {/* Value Prop */}
-            <section className="section bg-light">
+            <section className="section bg-deep">
                 <div className="container">
                     <div className="section-header text-center scroll-animate">
                         <h2>Value Proposition</h2>

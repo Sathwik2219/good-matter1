@@ -1,0 +1,338 @@
+[
+  {
+    "startup_name": "AASP.AI",
+    "signals": {
+      "team_score_potential": 9,
+      "market_size_raw": "$90–100 Billion (TAM)",
+      "revenue_mrr": "Projected $20k-$100k+ (Startup/Enterprise tiers)",
+      "growth_rate": "High (Projected 5x Year 2 to Year 3)",
+      "moat_strength": 8,
+      "business_model": "SaaS (Credits + Managed Hosting)",
+      "tech_complexity": 9
+    },
+    "executive_summary": "AASP.AI is an AI-powered coding agent platform that automates full-stack application construction, deployment, and ongoing maintenance. Aimed at enterprise fit with auditable actions and integrated CI/CD hosting.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "ALPL (Akhilesh Lefin)",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "INR 70 Trillion (TAM)",
+      "revenue_mrr": "INR 2.4M (Interest Received basis)",
+      "growth_rate": "Steady (60% Loan Portfolio growth in 2 years)",
+      "moat_strength": 7,
+      "business_model": "NBFC Lending (Mortgage, Personal, Business)",
+      "tech_complexity": 4
+    },
+    "executive_summary": "Established in 1995, ALPL is a Rajasthan-based NBFC specializing in underserved semi-urban markets with an ultra-low 0.01% NPA ratio. Focused on building a compliant, community-driven credit ecosystem.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Awbabie (Amazia Garments)",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$22.1 Billion (TAM)",
+      "revenue_mrr": "Rs 33 Lakhs (approx. based on Rs 4Cr FY25)",
+      "growth_rate": "High (Accelerating growth Q1 2025)",
+      "moat_strength": 7,
+      "business_model": "D2C / Multi-brand Retail",
+      "tech_complexity": 3
+    },
+    "executive_summary": "A conscious kidswear brand focusing on 100% cotton, ethical production, and affordable premium styling for the Indian market. Operating two brands (Awbabie and Amazia) covering ages 0-12.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Debtworks",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "Global (India/US/Singapore corridor)",
+      "revenue_mrr": "Advisory Basis (Cheque sizes 25L - 100Cr+)",
+      "growth_rate": "High (500+ companies curated, spectacular pipeline)",
+      "moat_strength": 8,
+      "business_model": "Debt Advisory / Non-dilutive Financing",
+      "tech_complexity": 4
+    },
+    "executive_summary": "Debtworks is a premier debt advisory firm providing non-dilutive financing solutions for startups and MSMEs. With 150+ lenders and a global corridor presence, they specialize in revenue-based financing and supply chain credit.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Doffair",
+    "signals": {
+      "team_score_potential": 9,
+      "market_size_raw": "$2.6 Billion (TAM - Indian Pet Care)",
+      "revenue_mrr": "Targeting Rs 66 Lakhs (based on ₹8Cr target)",
+      "growth_rate": "Aggressive (Targeting 7.5x growth in 2 years)",
+      "moat_strength": 9,
+      "business_model": "B2B SaaS (CRM) + Marketplace + B2C Subscription",
+      "tech_complexity": 7
+    },
+    "executive_summary": "Doffair is a vertical platform for pet parenting, combining social matchmaking (Tinder for Pets) with a professional operating system for vets and groomers (Backend CRM). Focused on closing the 'pet-friendly' gap in India.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Remote Physios (OsteoQure)",
+    "signals": {
+      "team_score_potential": 9,
+      "market_size_raw": "$17 Billion (TAM - Physio Market)",
+      "revenue_mrr": "INR 2.25 Lakhs (Current)",
+      "growth_rate": "High (Pipeline from 13L current to 2.9Cr projected)",
+      "moat_strength": 9,
+      "business_model": "Device-first SaaS (Sales + Subscriptions)",
+      "tech_complexity": 9
+    },
+    "executive_summary": "OsteoQure (Remote Physios) is a Medtech startup bridging the physiotherapy gap using IoT-enabled devices and AR-based gamified rehabilitation. Holds multiple patents and CDSCO licensing for remote rehabilitation.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "HireX",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$6 Trillion+ (Global Skill Market)",
+      "revenue_mrr": "Targeting $960k (based on $11.5M Year 1 target)",
+      "growth_rate": "Aggressive (Targeting $100B valuation in 5 years)",
+      "moat_strength": 8,
+      "business_model": "Marketplace (Transaction fees + Subscriptions)",
+      "tech_complexity": 6
+    },
+    "executive_summary": "HireX is a real-time human skill network (Uber for talent) aimed at revolutionizing global hiring. Uses proprietary AI-driven matching and a rigorous verification layer to provide instant access to professionals across 150+ countries.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Innovision Future Tech",
+    "signals": {
+      "team_score_potential": 7,
+      "market_size_raw": "USD 3.08 Billion (India IPTV Market)",
+      "revenue_mrr": "Subscription-led (Projected $722M potential)",
+      "growth_rate": "Steady (18% CAGR for industry)",
+      "moat_strength": 7,
+      "business_model": "Hybrid Media (Subscriptions + Ads + Carriage Fees)",
+      "tech_complexity": 6
+    },
+    "executive_summary": "Innovision FutureTech is reimagining television with a dynamic, AI-powered hybrid IPTV platform. Focused on Portability and AI-driven navigation to capture India's rapidly growing OTT and digital video market.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Ivy Bound",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "USD 10 Billion+ (US Tutoring Market)",
+      "revenue_mrr": "USD 108k (based on $1.3M Annual Revenue)",
+      "growth_rate": "Stable (20+ years of operation)",
+      "moat_strength": 7,
+      "business_model": "B2C Tutoring + B2B School District Contracts",
+      "tech_complexity": 3
+    },
+    "executive_summary": "Ivy Bound is a premier U.S.-based test prep and academic tutoring company with a 23-year track record. Boasts a 96% referral rate and highly recurring revenue models focused on standardized test success.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Kaksha Live",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$46.5 Billion (Total Education ERP)",
+      "revenue_mrr": "$3.3k (based on $40k FY 25-26 project)",
+      "growth_rate": "High (100+ schools, 25k+ MAU, 95% Retention)",
+      "moat_strength": 8,
+      "business_model": "EdTech SaaS (School Management)",
+      "tech_complexity": 7
+    },
+    "executive_summary": "Kaksha Live is an AI-powered, mobile-first school management ecosystem with native language support. It streamlines operations for 100+ schools, eliminating revenue leakage and administrative overhead through integrated apps for admins, teachers, and parents.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "KarkhanaHub",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "₹4.29 Lakh Crore (Indian Capital Goods)",
+      "revenue_mrr": "Commission-based (Targeting ₹14Cr/yr growth)",
+      "growth_rate": "High (5.6M Schools/Labs target, 10% commission model)",
+      "moat_strength": 8,
+      "business_model": "MaaS (Machines as a Service) Marketplace",
+      "tech_complexity": 6
+    },
+    "executive_summary": "KarkhanaHub is a digital MaaS platform that centralizes machine discovery and booking across 20,000+ labs in India. It connects idle machinery infrastructure with startups and SMEs, solving for the current lack of digital visibility in the manufacturing sector.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "LUSTR",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$22.79 Billion (Global Lab-grown Diamond)",
+      "revenue_mrr": "₹19 Lakhs (based on ₹2.3Cr total rev May 2025)",
+      "growth_rate": "High (Doubled revenue in 7 months)",
+      "moat_strength": 8,
+      "business_model": "D2C Sustainable Luxury (Jewelry)",
+      "tech_complexity": 4
+    },
+    "executive_summary": "LUSTR is a sustainable luxury brand focused on lab-grown diamond jewelry. Led by 4th-generation jewelers and tech-experienced talent, it has achieved rapid revenue growth and plans to scale to a global omnichannel presence.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Mark AI",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$4.1 Billion (India OOH Market)",
+      "revenue_mrr": "₹35 Lakhs (based on ₹4.3Cr Year 1 project)",
+      "growth_rate": "Aggressive (Scaling to 1000 screens in 24 months)",
+      "moat_strength": 8,
+      "business_model": "Programmatic DOOH Marketplace (25-40% Comm.)",
+      "tech_complexity": 7
+    },
+    "executive_summary": "Mark AI is a self-serve, AI-led marketplace for Digital Out-of-Home (DOOH) advertising. It turns static outdoor screens into a programmable channel with real-time, hyper-local targeting and an intelligence layer for yield optimization.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "MMC (Meet My Coach)",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$258 Billion (Digital Learning TAM)",
+      "revenue_mrr": "$38k (Current)",
+      "growth_rate": "High (8x growth in 2 years, targeting $1.7M FY25-26)",
+      "moat_strength": 8,
+      "business_model": "EdTech Marketplace ($10/hr Platform Fee)",
+      "tech_complexity": 6
+    },
+    "executive_summary": "Meet My Coach is an AI-driven multicultural online learning platform specifically for overseas Asian immigrants to learn culture, language, and skills. Features an AI matching engine and a 95% retention rate with 3500+ qualified coaches.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Omspace",
+    "signals": {
+      "team_score_potential": 9,
+      "market_size_raw": "$5.04 Billion (Small Satellite Launch Market)",
+      "revenue_mrr": "Milestone-based (₹12 Cr per launch service)",
+      "growth_rate": "High (Suborbital 2027, Orbital 2028 targets)",
+      "moat_strength": 9,
+      "business_model": "Launch-as-a-Service + SpaceTech Training",
+      "tech_complexity": 10
+    },
+    "executive_summary": "Omspace is a deep-tech aerospace startup building India's first reusable small satellite launch vehicle. Led by ex-ISRO scientists and IIT engineers, they utilize 3D-printing and cryogenic fuel to significantly reduce launch costs.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Prime Directive",
+    "signals": {
+      "team_score_potential": 9,
+      "market_size_raw": "$37 Billion (Total Education & VC)",
+      "revenue_mrr": "Projected $14k-$70k (based on user milestones)",
+      "growth_rate": "High (Targeting Type-1 Civilization impact)",
+      "moat_strength": 9,
+      "business_model": "EdTech SaaS + Venture Studio (Equity)",
+      "tech_complexity": 8
+    },
+    "executive_summary": "Prime Directive is a revolutionary 'Abstract Learning' ecosystem aimed at building the next generation of founders. Combines high-fidelity visual education (VFX/SFX) with a venture creation engine (Founder Bridge) and blockchain certification.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Community Cart",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$130 Billion (India Tier-2/3/4 Market)",
+      "revenue_mrr": "₹18 Lakhs (Current)",
+      "growth_rate": "High (70L+ revenue in first 7 months)",
+      "moat_strength": 8,
+      "business_model": "Franchise-led Q-Commerce (Inventory + Delivery)",
+      "tech_complexity": 6
+    },
+    "executive_summary": "Community Cart is 'Quick Commerce for Bharat,' transforming neighborhood Kirana stores into 10-minute delivery machines. Uses a franchise model and data-driven stock prediction to capture the untapped social grocery bond in Tier 2/3/4 cities.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Smart Cookie Foods",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "₹50k Crore+ (Indian Healthy Snack Market)",
+      "revenue_mrr": "₹25,000 (Current) -> ₹5 Lakhs (Projected 6mo)",
+      "growth_rate": "High (22% Industry CAGR)",
+      "moat_strength": 7,
+      "business_model": "D2C + B2B Distribution (Cafes/Gyms)",
+      "tech_complexity": 3
+    },
+    "executive_summary": "Smart Cookie Foods is a functional food brand targeting the onset of lifestyle diseases in urban India. Focused on whole-food, plant-based luxury snacks with diabetic-friendly formulations. Incubated at IIM Bangalore.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Walnut Health Club",
+    "signals": {
+      "team_score_potential": 9,
+      "market_size_raw": "$2.2 Billion (Global Longevity)",
+      "revenue_mrr": "₹40,000 (Current) -> Targeting $38k (next phase)",
+      "growth_rate": "High (Strategic pivot to high-intent ICP)",
+      "moat_strength": 8,
+      "business_model": "Subscription Health OS ($365/year)",
+      "tech_complexity": 6
+    },
+    "executive_summary": "Walnut is a health OS specifically designed for software engineers to navigate lifestyle diseases and build longevity. Led by a team with previous 7-figure exits and AI expertise, it utilizes data-driven dashboards and expert coaching.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "HappyRhino Foods",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "USD 49.8 Billion (Indian Foodservice)",
+      "revenue_mrr": "₹3.5 Lakhs (Proven) -> ₹15 Lakhs (Projected)",
+      "growth_rate": "4x (Expansion to new prime locations)",
+      "moat_strength": 7,
+      "business_model": "Multi-brand Cloud Kitchen + Dine-in + Franchise",
+      "tech_complexity": 4
+    },
+    "executive_summary": "HappyRhino Foods is a Bangalore-based multi-cuisine brand aggregator operating 7 diverse food brands. Focused on consistent quality and localized CRM experiences, it boasts strong Zomato/Swiggy ratings and a clear roadmap for franchise expansion.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Shoptainment",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "$69 Billion (India Social Commerce TAM)",
+      "revenue_mrr": "Targeting ₹83 Lakhs (based on 10Cr/yr project)",
+      "growth_rate": "High (Viral shoppable video mechanics)",
+      "moat_strength": 8,
+      "business_model": "Marketplace Commission (10%) + SaaS Tiers",
+      "tech_complexity": 7
+    },
+    "executive_summary": "Shoptainment is an interactive video commerce platform that allows users to shop directly through content. Led by a seasoned filmmaker, it uses patented 'automatic search' technology to bridge the gap between marketing and actual sales at the point of inspiration.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "Serava",
+    "signals": {
+      "team_score_potential": 7,
+      "market_size_raw": "₹1,000 Crore+ (Indian Fitness & Health)",
+      "revenue_mrr": "₹2 Lakhs (Year 1) -> ₹12.5 Lakhs (Year 3 project)",
+      "growth_rate": "High (Targeting 6x revenue growth in 3 years)",
+      "moat_strength": 7,
+      "business_model": "SaaS-enabled Recovery Lounge (Subscription)",
+      "tech_complexity": 5
+    },
+    "executive_summary": "Serava is a tech-driven recovery lounge bridging the gap between clinical rehab and luxury spas. It offers science-backed modalities (red-light, ice baths, EMS) for athletes and fitness enthusiasts in urban India.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "SIMBA",
+    "signals": {
+      "team_score_potential": 8,
+      "market_size_raw": "Global (10M+ tech hires annually)",
+      "revenue_mrr": "SaaS/Recruitment (Targeting $1.2M initial phase)",
+      "growth_rate": "Very High (First-mover in AI-native hiring)",
+      "moat_strength": 8,
+      "business_model": "B2B SaaS (Licensing + Pay-per-hire)",
+      "tech_complexity": 7
+    },
+    "executive_summary": "SIMBA is the world's first recruitment platform focused specifically on 'AI-native' engineers. It quantifies how efficiently candidates collaborate with AI tools like Cursor and Copilot to build products 10x faster.",
+    "label": "HIGH_QUALITY"
+  },
+  {
+    "startup_name": "SRDDO (Space Research & Defence)",
+    "signals": {
+      "team_score_potential": 9,
+      "market_size_raw": "$20 Billion+ (Global Space Launch)",
+      "revenue_mrr": "Advisory/Service ($25k Year 1 -> $2M Year 5)",
+      "growth_rate": "Exponential (Projected $50B market by Year 7)",
+      "moat_strength": 10,
+      "business_model": "Gov Contracts + Tech Licensing + NASA/ISRO collab",
+      "tech_complexity": 10
+    },
+    "executive_summary": "SRDDO is a pioneering aerospace enterprise creating reusable space launch vehicles with VTOL capability. Led by veteran ISRO scientists and high-tenure engineers, it focuses on planetary logistics and indigenous defense tech.",
+    "label": "HIGH_QUALITY"
+  }
+]
