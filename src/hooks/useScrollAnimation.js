@@ -23,6 +23,7 @@ export const useScrollAnimation = () => {
       el.style.opacity         = '0';
       el.style.transitionDelay = delay ? `${delay}ms` : '0ms';
       el.style.transition      = `opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1)`;
+      el.style.willChange      = 'transform, opacity';
 
       if (type === 'fade-up' || type === 'scroll-animate') {
         el.style.transform = 'translateY(28px)';

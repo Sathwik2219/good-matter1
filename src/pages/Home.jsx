@@ -13,53 +13,75 @@ const Home = () => {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         let animationFrameId;
+        let isVisible = true;
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const setCanvasSize = () => {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
+        };
+        setCanvasSize();
 
+        const particleCount = window.innerWidth < 768 ? 15 : 30;
         const particles = [];
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < particleCount; i++) {
             particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
                 radius: Math.random() * 1.5 + 0.5,
-                vx: Math.random() * 0.5 - 0.25,
-                vy: Math.random() * 0.5 - 0.25,
+                vx: Math.random() * 0.4 - 0.2,
+                vy: Math.random() * 0.4 - 0.2,
             });
         }
 
         const draw = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(250, 177, 160, 0.4)'; // Soft Peach
-            particles.forEach(p => {
+            if (!isVisible) return;
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.fillStyle = 'rgba(250, 177, 160, 0.4)';
+            
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
                 p.x += p.vx; p.y += p.vy;
-                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                if (p.x < 0 || p.x > window.innerWidth) p.vx *= -1;
+                if (p.y < 0 || p.y > window.innerHeight) p.vy *= -1;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 ctx.fill();
-            });
-            ctx.strokeStyle = 'rgba(116, 185, 255, 0.1)'; // Soft Blue
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < particles.length; i++) {
+
                 for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    if (Math.sqrt(dx * dx + dy * dy) < 150) {
+                    const p2 = particles[j];
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < 150 * 150) {
+                        ctx.strokeStyle = `rgba(116, 185, 255, ${0.1 * (1 - distSq / (150 * 150))})`;
+                        ctx.lineWidth = 0.5;
                         ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
                         ctx.stroke();
                     }
                 }
             }
             animationFrameId = requestAnimationFrame(draw);
         };
-        draw();
 
-        const handleResize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-        window.addEventListener('resize', handleResize);
-        return () => { cancelAnimationFrame(animationFrameId); window.removeEventListener('resize', handleResize); };
+        const observer = new IntersectionObserver(([entry]) => {
+            isVisible = entry.isIntersecting;
+            if (isVisible) draw();
+        }, { threshold: 0.1 });
+
+        observer.observe(canvas);
+        window.addEventListener('resize', setCanvasSize);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+            window.removeEventListener('resize', setCanvasSize);
+            observer.disconnect();
+        };
     }, []);
 
     const valueProps = [
